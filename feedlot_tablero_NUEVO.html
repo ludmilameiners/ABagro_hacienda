@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>Feedlot AB Agro</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+<style>
+:root{--bg:#1a1814;--bg-2:#221f1a;--bg-3:#2b2722;--ink:#e8e2d4;--ink-2:#b8b2a3;--ink-3:#7a7468;--accent:#c89858;--accent-2:#8fa86b;--danger:#c8615a;--good:#8fa86b;--warn:#d9a657;--validation:#6da14f;--campo-25:#c89858;--campo-wini:#7b9aaf;--border:#38322b}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--ink);font-family:'Inter',sans-serif;font-size:14px;line-height:1.5;min-height:100vh}
+body{background-image:radial-gradient(circle at 8% 10%,rgba(200,152,88,0.04),transparent 40%),radial-gradient(circle at 92% 90%,rgba(143,168,107,0.04),transparent 40%)}
+.app{max-width:1400px;margin:0 auto;padding:32px 24px 80px}
+header.hero{border-bottom:1px solid var(--border);padding-bottom:28px;margin-bottom:36px;display:grid;grid-template-columns:1fr auto;gap:20px;align-items:end}
+.hero h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(28px,4vw,44px);letter-spacing:-0.02em;line-height:1.05}
+.hero h1 em{font-style:italic;font-weight:400;color:var(--accent)}
+.hero .meta{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-3);text-align:right;text-transform:uppercase;letter-spacing:0.08em;line-height:1.8}
+.hero .meta strong{color:var(--accent)}
+.badge-validated{display:inline-block;padding:4px 10px;border-radius:20px;background:rgba(109,161,79,0.15);color:var(--validation);font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;border:1px solid rgba(109,161,79,0.4);margin-left:8px}
+nav.tabs{display:flex;flex-wrap:wrap;gap:2px;margin-bottom:32px;background:var(--bg-2);padding:4px;border-radius:10px;border:1px solid var(--border)}
+.tab-btn{background:transparent;border:none;color:var(--ink-2);padding:10px 16px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:500;border-radius:7px;transition:all 0.15s ease;white-space:nowrap}
+.tab-btn:hover{color:var(--ink);background:var(--bg-3)}
+.tab-btn.active{background:var(--accent);color:var(--bg);font-weight:600}
+.tab-btn.validation.active{background:var(--validation);color:var(--bg)}
+.tab-btn.future.active{background:var(--accent-2);color:var(--bg)}
+.panel{display:none}
+.panel.active{display:block}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:32px}
+.kpi{background:var(--bg-2);border:1px solid var(--border);border-radius:12px;padding:18px 20px;position:relative;overflow:hidden}
+.kpi::before{content:'';position:absolute;top:0;left:0;bottom:0;width:3px;background:var(--accent)}
+.kpi.good::before{background:var(--good)}
+.kpi.warn::before{background:var(--warn)}
+.kpi.danger::before{background:var(--danger)}
+.kpi.validation::before{background:var(--validation)}
+.kpi.campo-25::before{background:var(--campo-25)}
+.kpi.campo-wini::before{background:var(--campo-wini)}
+.kpi .label{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-3);margin-bottom:8px}
+.kpi .value{font-family:'Fraunces',serif;font-weight:500;font-size:32px;letter-spacing:-0.02em;line-height:1}
+.kpi .unit{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-3);margin-top:6px;text-transform:uppercase}
+.kpi .extra{font-size:12px;color:var(--ink-2);margin-top:10px}
+h2.section{font-family:'Fraunces',serif;font-weight:500;font-size:22px;margin:32px 0 6px;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+h2.section .num{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);letter-spacing:0.1em}
+.section-desc{color:var(--ink-2);font-size:13px;margin-bottom:18px;max-width:800px}
+.tabla{background:var(--bg-2);border:1px solid var(--border);border-radius:12px;overflow:hidden;overflow-x:auto;margin-bottom:24px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{background:var(--bg-3);color:var(--ink-2);text-align:left;padding:12px 16px;font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid var(--border);white-space:nowrap}
+tbody td{padding:11px 16px;border-bottom:1px solid var(--border);color:var(--ink)}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover{background:var(--bg-3)}
+.num-cell{font-family:'JetBrains Mono',monospace}
+.gdp-cell{font-family:'JetBrains Mono',monospace;font-weight:700}
+.gdp-bad{color:var(--danger)}
+.gdp-ok{color:var(--warn)}
+.gdp-good{color:var(--good)}
+.tropa-name{font-weight:500;max-width:280px}
+.chart-wrap{background:var(--bg-2);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:24px}
+.chart-wrap h3{font-family:'Fraunces',serif;font-weight:500;font-size:16px;margin-bottom:4px}
+.chart-wrap .desc{color:var(--ink-3);font-size:12px;margin-bottom:16px}
+.chart-canvas{position:relative;height:320px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media (max-width:900px){.two-col{grid-template-columns:1fr}}
+.callout{background:linear-gradient(135deg,rgba(200,152,88,0.10),rgba(143,168,107,0.06));border:1px solid rgba(200,152,88,0.25);border-radius:12px;padding:18px 22px;margin-bottom:24px}
+.callout.alarm{background:linear-gradient(135deg,rgba(200,97,90,0.10),rgba(200,97,90,0.04));border-color:rgba(200,97,90,0.35)}
+.callout.info{background:linear-gradient(135deg,rgba(143,168,107,0.10),rgba(143,168,107,0.04));border-color:rgba(143,168,107,0.35)}
+.callout.validation{background:linear-gradient(135deg,rgba(109,161,79,0.12),rgba(109,161,79,0.04));border-color:rgba(109,161,79,0.4)}
+.callout h4{font-family:'Fraunces',serif;font-weight:600;font-size:15px;margin-bottom:6px;color:var(--accent)}
+.callout.alarm h4{color:var(--danger)}
+.callout.info h4,.callout.validation h4{color:var(--validation)}
+.callout p{color:var(--ink);font-size:13px}
+.conclusion-grid{display:grid;grid-template-columns:1fr;gap:12px}
+.conclusion{background:var(--bg-2);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:8px;padding:16px 20px}
+.conclusion.alarm{border-left-color:var(--danger)}
+.conclusion.good{border-left-color:var(--good)}
+.conclusion.validation{border-left-color:var(--validation)}
+.conclusion .title{font-family:'Fraunces',serif;font-weight:600;font-size:15px;margin-bottom:4px}
+.conclusion .body{color:var(--ink-2);font-size:13px;line-height:1.5}
+.codigos-box{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:24px}
+.codigo{background:var(--bg-2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;text-align:center}
+.codigo .cod{font-family:'Fraunces',serif;font-size:32px;font-weight:600;color:var(--accent);line-height:1}
+.codigo .nom{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-2);margin-top:8px}
+.precios-panel{background:var(--bg-2);border:1px solid var(--border);border-radius:12px;padding:20px 24px;margin-bottom:24px}
+.precios-panel h3{font-family:'Fraunces',serif;font-weight:500;font-size:16px;margin-bottom:4px}
+.precios-panel .desc{color:var(--ink-3);font-size:12px;margin-bottom:16px}
+.precios-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px}
+.precio-input{background:var(--bg-3);border:1px solid var(--border);border-radius:8px;padding:12px 14px}
+.precio-input .label-cat{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px}
+.precio-input input{background:transparent;border:none;color:var(--ink);font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:600;width:100%;outline:none;padding:4px 0;border-bottom:1px solid var(--border)}
+.precio-input input:focus{border-bottom-color:var(--accent)}
+.precio-input .unit-cat{font-size:10px;color:var(--ink-3);margin-top:4px}
+.btn-reset{background:transparent;border:1px solid var(--border);color:var(--ink-2);padding:8px 16px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:12px;margin-top:16px}
+.btn-reset:hover{background:var(--bg-3);color:var(--ink)}
+.evento-card{background:var(--bg-2);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-bottom:10px;display:grid;grid-template-columns:auto 1fr auto auto auto auto;gap:16px;align-items:center}
+.evento-card .id-num{font-family:'Fraunces',serif;font-size:24px;font-weight:600;color:var(--campo-wini)}
+.evento-card .nombre{font-weight:500}
+.evento-card .nombre .sub{font-size:11px;color:var(--ink-3);margin-top:2px}
+.evento-card .info{text-align:right}
+.evento-card .info .v{font-family:'JetBrains Mono',monospace;font-weight:600;font-size:14px}
+.evento-card .info .l{font-size:10px;color:var(--ink-3);text-transform:uppercase;letter-spacing:0.05em}
+@media (max-width:900px){.evento-card{grid-template-columns:1fr 1fr}}
+footer{margin-top:60px;padding-top:24px;border-top:1px solid var(--border);font-size:11px;color:var(--ink-3);text-align:center;font-family:'JetBrains Mono',monospace}
+
+@media (max-width: 768px) {
+  .app { padding: 16px 12px 40px; }
+  header.hero { 
+    grid-template-columns: 1fr; 
+    padding-bottom: 16px; 
+    margin-bottom: 20px;
+    gap: 12px;
+  }
+  .hero h1 { font-size: 24px; }
+  .hero .meta { text-align: left; font-size: 10px; line-height: 1.6; }
+  nav.tabs {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    padding: 4px;
+  }
+  .tab-btn {
+    flex-shrink: 0;
+    padding: 8px 14px;
+    font-size: 12px;
+  }
+  h2.section { font-size: 18px; }
+  .kpi-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .kpi { padding: 14px 16px; }
+  .kpi .value { font-size: 24px; }
+  .kpi .label { font-size: 10px; }
+  .two-col { grid-template-columns: 1fr; gap: 12px; }
+  .callout { padding: 14px 16px; }
+  .callout p { font-size: 12px; }
+  table { font-size: 11px; }
+  thead th { padding: 8px 10px; font-size: 10px; }
+  tbody td { padding: 8px 10px; }
+  .chart-canvas { height: 260px; }
+  .evento-card { 
+    grid-template-columns: 1fr 1fr; 
+    gap: 10px; 
+    padding: 12px;
+    font-size: 12px;
+  }
+  .evento-card .id-num { font-size: 20px; }
+  .precios-grid { grid-template-columns: 1fr 1fr; }
+  .codigos-box { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 480px) {
+  .kpi-grid { grid-template-columns: 1fr; }
+  .hero h1 { font-size: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<header class="hero">
+  <div>
+    <h1>Feedlot AB Agro<br><em>Tablero integral — pasado, presente y futuro</em></h1>
+    <div style="margin-top:8px"><span class="badge-validated">Validado con TrueTest</span></div>
+  </div>
+  <div class="meta">
+    Fecha reporte<br><strong id="meta-fecha"></strong><br><br>
+    Stock al<br><strong id="meta-stock-fecha">21/05/2026</strong><br><br>
+    Vendidos<br><strong id="meta-total"></strong><br><br>
+    En stock<br><strong id="meta-stock"></strong>
+  </div>
+</header>
+
+<nav class="tabs" id="main-tabs">
+  <button class="tab-btn active" data-tab="resumen">Resumen</button>
+  <button class="tab-btn future" data-tab="proyeccion">Proyeccion de ventas</button>
+  <button class="tab-btn" data-tab="stock">Stock por campo</button>
+  <button class="tab-btn" data-tab="categoria">Por categoria</button>
+  <button class="tab-btn future" data-tab="apertura">Recria vs Terminacion</button>
+  <button class="tab-btn" data-tab="etapa">Por etapa</button>
+  <button class="tab-btn" data-tab="nave">Naves</button>
+  <button class="tab-btn" data-tab="tropas">Tropas</button>
+  <button class="tab-btn" data-tab="alarmas">Alarmas</button>
+  <button class="tab-btn validation" data-tab="validacion">Validacion</button>
+  <button class="tab-btn validation" data-tab="origen">Origen</button>
+  <button class="tab-btn" data-tab="mensual">Evolucion historica</button>
+  <button class="tab-btn" data-tab="conclusiones">Conclusiones</button>
+</nav>
+
+<section class="panel active" data-panel="resumen">
+  <h2 class="section"><span class="num">01</span>Resumen ejecutivo</h2>
+  <p class="section-desc">El feedlot opera en dos sitios: 25 de Mayo (engorde a corral) y Winifreda (campo de cria). Este tablero consolida analisis historico de ventas, stock actual validado y proyeccion a futuro con precios editables.</p>
+  <div class="kpi-grid">
+    <div class="kpi campo-25"><div class="label">25 de Mayo - Stock</div><div class="value" id="r-stock-25">-</div><div class="unit">cabezas en engorde</div></div>
+    <div class="kpi campo-wini"><div class="label">Winifreda - Cria</div><div class="value" id="r-stock-wini">-</div><div class="unit">cabezas en campo</div></div>
+    <div class="kpi"><div class="label">Vendidos historico</div><div class="value" id="r-vendidos">-</div><div class="unit">ene 2025 - may 2026</div></div>
+    <div class="kpi good"><div class="label">GDP historico</div><div class="value" id="r-gdp">-</div><div class="unit">kg/dia validado TT</div></div>
+    <div class="kpi"><div class="label">Venta proyectada</div><div class="value" id="r-venta">-</div><div class="unit">millones $</div></div>
+    <div class="kpi"><div class="label">Eventos pendientes Wini</div><div class="value" id="r-eventos">-</div><div class="unit">ingresos planeados</div></div>
+  </div>
+  <div class="callout"><h4>Lectura rapida</h4><p>Tenes <strong>2.644 cabezas activas en 25 de Mayo</strong> con proyeccion de venta por $5.704M, mas <strong>1.731 cabezas pendientes desde Winifreda</strong> que sumarian otros $7.145M. Total proyectado al cierre del ciclo: <strong>~$12.850 millones</strong> repartidos a lo largo de 22 meses (mayo 2026 a mayo 2028).</p></div>
+  <div class="callout validation"><h4>Los numeros son defendibles</h4><p>Validamos los pesos de ingreso contra 110.296 pesadas fisicas de TrueTest: 98,5% coincidencia exacta. Para el stock actual usamos la ultima pesada real, no el peso proyectado de Wincampo (que sobreestima 66%).</p></div>
+  <div class="callout info"><h4>Codigos de racion Wincampo (Cristian, 22/05/2026)</h4><p>Mapeo confirmado para cruzar con composicion historica de dietas.</p></div>
+  <div class="codigos-box">
+    <div class="codigo"><div class="cod">17</div><div class="nom">RECRIA 1</div></div>
+    <div class="codigo"><div class="cod">18</div><div class="nom">RECRIA 2</div></div>
+    <div class="codigo"><div class="cod">20</div><div class="nom">ADAPTACION</div></div>
+    <div class="codigo"><div class="cod">21</div><div class="nom">TERMINACION</div></div>
+  </div>
+</section>
+
+<section class="panel" data-panel="proyeccion">
+  <h2 class="section"><span class="num">02</span>Proyeccion de ventas<span class="badge-validated">Precios editables</span></h2>
+  <p class="section-desc">Cada animal del stock (real + proyectado Winifreda) tiene una fecha estimada de salida. Modifica los precios y el total se recalcula al instante.</p>
+  <div class="precios-panel">
+    <h3>Precios por categoria</h3>
+    <div class="desc">$ por kg al gancho. Modifica los valores para ver la proyeccion recalculada.</div>
+    <div class="precios-grid" id="precios-grid"></div>
+    <button class="btn-reset" id="btn-reset-precios">Volver a precios originales</button>
+  </div>
+  <div class="kpi-grid">
+    <div class="kpi campo-25"><div class="label">Total 25 de Mayo</div><div class="value" id="p-tot-25">-</div><div class="unit">millones $</div><div class="extra" id="p-cab-25"></div></div>
+    <div class="kpi campo-wini"><div class="label">Total Winifreda</div><div class="value" id="p-tot-wini">-</div><div class="unit">millones $</div><div class="extra" id="p-cab-wini"></div></div>
+    <div class="kpi good"><div class="label">Total proyectado</div><div class="value" id="p-tot">-</div><div class="unit">millones $</div><div class="extra" id="p-cab-tot"></div></div>
+  </div>
+  <div class="chart-wrap"><h3>Proyeccion mensual</h3><div class="desc">Cabezas (barras) y facturacion (linea) mes a mes.</div><div class="chart-canvas" style="height:420px"><canvas id="chart-proy"></canvas></div></div>
+  <div class="tabla"><table><thead><tr><th>Mes</th><th>Cab 25 Mayo</th><th>Venta 25 Mayo</th><th>Cab Winifreda</th><th>Venta Winifreda</th><th>Cab total</th><th>Venta total</th></tr></thead><tbody id="tbl-proy"></tbody></table></div>
+</section>
+
+<section class="panel" data-panel="stock">
+  <h2 class="section"><span class="num">03</span>Stock por campo</h2>
+  <p class="section-desc">Foto del stock real al 21/05/2026 (última planilla de recorrido descargada).</p>
+  <div class="two-col">
+    <div class="kpi campo-25"><div class="label">25 de Mayo - Feedlot</div><div class="value" id="s-25-cab">-</div><div class="unit">cabezas en engorde</div><div class="extra" id="s-25-info"></div></div>
+    <div class="kpi campo-wini"><div class="label">Winifreda - Cria</div><div class="value" id="s-wini-cab">-</div><div class="unit">cabezas en campo</div><div class="extra" id="s-wini-info"></div></div>
+  </div>
+  <h3 style="font-family:'Fraunces',serif;font-weight:500;font-size:18px;margin:24px 0 12px">25 de Mayo - Stock por categoria</h3>
+  <div class="tabla"><table><thead><tr><th>Categoria</th><th>Cabezas</th><th>Lotes</th><th>Venta proyectada</th></tr></thead><tbody id="tbl-stock-25"></tbody></table></div>
+  <h3 style="font-family:'Fraunces',serif;font-weight:500;font-size:18px;margin:24px 0 12px">Winifreda - Stock del campo de cria</h3>
+  <div class="callout info"><h4>Composicion del rodeo (al 11/05/2026)</h4><p>Vacas <strong id="w-vacas"></strong> - Toros <strong id="w-toros"></strong> - Vaquillonas preñadas <strong id="w-vq"></strong> - Terneras <strong id="w-th"></strong> - Terneros <strong id="w-tm"></strong> - <strong>TOTAL: <span id="w-total"></span></strong></p></div>
+  <h3 style="font-family:'Fraunces',serif;font-weight:500;font-size:18px;margin:24px 0 12px">Winifreda - Eventos de ingreso planeados</h3>
+  <div id="lst-eventos-wini"></div>
+</section>
+
+<section class="panel" data-panel="categoria">
+  <h2 class="section"><span class="num">04</span>Performance por categoria</h2>
+  <p class="section-desc">TH: ternera - TM: ternero - NT: novillito - VA: vaca - VQ: vaquillona.</p>
+  <div class="two-col">
+    <div class="chart-wrap"><h3>GDP por categoria</h3><div class="desc">Verde: bueno - Amarillo: medio - Rojo: bajo.</div><div class="chart-canvas"><canvas id="chart-cat-gdp"></canvas></div></div>
+    <div class="chart-wrap"><h3>Dias promedio en feedlot</h3><div class="desc">Cuanto mas bajo, mas rapido rota.</div><div class="chart-canvas"><canvas id="chart-cat-dias"></canvas></div></div>
+  </div>
+  <div class="tabla"><table><thead><tr><th>Cat</th><th>Vendidos</th><th>Peso ingreso</th><th>Peso salida</th><th>Kg ganados</th><th>Dias</th><th>GDP</th></tr></thead><tbody id="tbl-cat"></tbody></table></div>
+</section>
+
+
+<section class="panel" data-panel="apertura">
+  <h2 class="section"><span class="num">04b</span>Recría vs Terminación<span class="badge-validated" style="margin-left:10px;">Nuevo</span></h2>
+  <p class="section-desc">Apertura del GDP histórico (0,83) en sus dos etapas reales: período cuando el animal pesa menos de 300 kg (recría) y período cuando supera los 300 kg (terminación). Calculado con pesadas intermedias de TrueTest.</p>
+
+  <div class="callout alarm">
+    <h4>Diagnóstico: el cuello de botella está en RECRÍA</h4>
+    <p>Los animales pasan <strong>276 días en recría (GDP 0,58)</strong> y solo <strong>152 días en terminación (GDP 1,01)</strong>. Casi el doble de tiempo en la etapa más lenta. Terminación está cerca del techo teórico (1,1). Recría está 17% por debajo de su techo (0,7). Acá hay margen de mejora real.</p>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi warn">
+      <div class="label">RECRÍA — GDP real</div>
+      <div class="value" id="ap-r-gdp">0,58</div>
+      <div class="unit">kg/día</div>
+      <div class="extra">Techo teórico: 0,70</div>
+    </div>
+    <div class="kpi warn">
+      <div class="label">RECRÍA — Días promedio</div>
+      <div class="value" id="ap-r-dias">276</div>
+      <div class="unit">días</div>
+      <div class="extra">~9 meses</div>
+    </div>
+    <div class="kpi good">
+      <div class="label">TERMINACIÓN — GDP real</div>
+      <div class="value" id="ap-t-gdp">1,01</div>
+      <div class="unit">kg/día</div>
+      <div class="extra">Techo teórico: 1,10</div>
+    </div>
+    <div class="kpi good">
+      <div class="label">TERMINACIÓN — Días promedio</div>
+      <div class="value" id="ap-t-dias">152</div>
+      <div class="unit">días</div>
+      <div class="extra">~5 meses</div>
+    </div>
+  </div>
+
+  <div class="chart-wrap">
+    <h3>Apertura por categoría: GDP en cada etapa</h3>
+    <div class="desc">Vacas (VA) no pasan por recría, entran al feedlot ya pasadas los 300 kg.</div>
+    <div class="chart-canvas" style="height:340px"><canvas id="chart-apertura"></canvas></div>
+  </div>
+
+  <div class="tabla">
+    <table>
+      <thead><tr><th>Categoría</th><th>N</th><th>GDP Recría</th><th>Días Recría</th><th>GDP Terminación</th><th>Días Terminación</th></tr></thead>
+      <tbody id="tbl-apertura"></tbody>
+    </table>
+  </div>
+
+  <div class="callout info">
+    <h4>Implicancia operativa</h4>
+    <p>Si lográramos llevar la recría de 0,58 al techo teórico de 0,70 (gracias a la dieta SIN MAÍZ u otra optimización), los animales saldrían de recría unos <strong>50 días antes en promedio</strong>. Eso permite rotar más rápido el feedlot y producir más kilos por año con las mismas instalaciones. Es justamente lo que apunta a corregir la propuesta de Salvador.</p>
+  </div>
+
+  <div class="callout">
+    <h4>Cómo lo calculamos</h4>
+    <p>Para cada uno de los 4.017 animales vendidos, tomamos todas sus pesadas individuales en TrueTest (en promedio 5 pesadas por animal) y detectamos cuándo cruzó los 300 kg. El período antes del cruce es recría; el período después es terminación. Las vacas (VA) por lo general entran al feedlot ya pasadas los 300 kg, por eso casi no aparecen en recría.</p>
+  </div>
+</section>
+
+<section class="panel" data-panel="etapa">
+  <h2 class="section"><span class="num">05</span>Por etapa de dieta</h2>
+  <div class="chart-wrap"><h3>GDP por ultima racion</h3><div class="chart-canvas"><canvas id="chart-racion"></canvas></div></div>
+  <div class="tabla"><table><thead><tr><th>Ultima racion</th><th>Vendidos</th><th>Peso ingreso</th><th>Peso salida</th><th>Kg ganados</th><th>Dias</th><th>GDP</th></tr></thead><tbody id="tbl-rac"></tbody></table></div>
+</section>
+
+<section class="panel" data-panel="nave">
+  <h2 class="section"><span class="num">06</span>Nave A vs Nave B</h2>
+  <p class="section-desc">Nave A = corrales C. Nave B = corrales B.</p>
+  <div class="two-col">
+    <div class="chart-wrap"><h3>GDP cruda por nave</h3><div class="chart-canvas"><canvas id="chart-nave"></canvas></div></div>
+    <div class="chart-wrap"><h3>GDP controlando por etapa</h3><div class="chart-canvas"><canvas id="chart-nave-etapa"></canvas></div></div>
+  </div>
+  <div class="callout alarm"><h4>Hallazgo</h4><p>Nave B rinde sistematicamente por debajo de Nave A. Confirmar si es instalaciones o tipo de animal.</p></div>
+</section>
+
+<section class="panel" data-panel="tropas">
+  <h2 class="section"><span class="num">07</span>Tropas</h2>
+  <p class="section-desc">Filtro: tropas con 20+ animales vendidos.</p>
+  <div class="two-col">
+    <div><div class="chart-wrap"><h3>15 peores</h3></div><div class="tabla"><table><thead><tr><th>Tropa</th><th>N</th><th>Dias</th><th>GDP</th></tr></thead><tbody id="tbl-peores"></tbody></table></div></div>
+    <div><div class="chart-wrap"><h3>15 mejores</h3></div><div class="tabla"><table><thead><tr><th>Tropa</th><th>N</th><th>Dias</th><th>GDP</th></tr></thead><tbody id="tbl-mejores"></tbody></table></div></div>
+  </div>
+</section>
+
+<section class="panel" data-panel="alarmas">
+  <h2 class="section"><span class="num">08</span>Animales con etiqueta RECRIA al venderse</h2>
+  <div class="callout info"><h4>Lectura corregida</h4><p>De los 414 animales con etiqueta "RECRIA" al venderse, <strong>solo 1 es descarte real</strong> (peso de salida menor a 300 kg). Los otros 413 son novillitos/vaquillonas que terminaron normalmente con 400+ kg pero quedaron con la etiqueta vieja porque nadie actualizo el campo en Wincampo. No es alarma productiva, es desactualizacion administrativa.</p></div>
+  <div class="tabla"><table><thead><tr><th>Tropa</th><th>Vendidos</th><th>Peso ingreso</th><th>Peso salida</th><th>Dias</th><th>GDP</th></tr></thead><tbody id="tbl-alarma"></tbody></table></div>
+</section>
+
+<section class="panel" data-panel="validacion">
+  <h2 class="section"><span class="num">09</span>Validacion de datos</h2>
+  <p class="section-desc">Como sabemos que los numeros son correctos.</p>
+  <div class="kpi-grid">
+    <div class="kpi validation"><div class="label">Animales analizados</div><div class="value">4.017</div><div class="unit">cabezas vendidas</div></div>
+    <div class="kpi validation"><div class="label">Match con TrueTest</div><div class="value">99%</div><div class="unit">RFID encontrado</div></div>
+    <div class="kpi validation"><div class="label">Peso identico</div><div class="value">98,5%</div><div class="unit">con balanza fisica</div></div>
+    <div class="kpi validation"><div class="label">Pesadas fisicas</div><div class="value">110k</div><div class="unit">TrueTest 2020-26</div></div>
+  </div>
+  <div class="callout validation"><h4>Conclusion</h4><p>Los GDP que reportamos parten de mediciones fisicas reales. No son estimaciones, no son proyecciones.</p></div>
+</section>
+
+<section class="panel" data-panel="origen">
+  <h2 class="section"><span class="num">10</span>Cria propia vs comprados</h2>
+  <div class="callout info"><h4>Diferencia mas marcada en vaquillonas</h4><p>VQ comprados: 1,01 GDP - VQ cria: 0,74 (-27%). NT comprados: 0,78 - NT cria: 0,71 (-9%). En vacas no hay diferencia.</p></div>
+  <div class="chart-wrap"><h3>GDP cria propia vs comprados</h3><div class="chart-canvas" style="height:380px"><canvas id="chart-origen"></canvas></div></div>
+  <div class="tabla"><table><thead><tr><th>Cat</th><th>N Comprados</th><th>GDP Comp</th><th>Dias Comp</th><th>N Cria</th><th>GDP Cria</th><th>Dias Cria</th></tr></thead><tbody id="tbl-origen"></tbody></table></div>
+</section>
+
+<section class="panel" data-panel="mensual">
+  <h2 class="section"><span class="num">11</span>Evolucion historica</h2>
+  <div class="chart-wrap"><h3>Cabezas vendidas y GDP por mes</h3><div class="chart-canvas" style="height:380px"><canvas id="chart-mensual"></canvas></div></div>
+  <div class="tabla"><table><thead><tr><th>Mes</th><th>Vendidos</th><th>Peso sal</th><th>Dias</th><th>GDP</th><th>Kg totales</th></tr></thead><tbody id="tbl-mes"></tbody></table></div>
+</section>
+
+<section class="panel" data-panel="conclusiones">
+  <h2 class="section"><span class="num">12</span>Conclusiones</h2>
+  <div class="conclusion-grid" id="lst-concl"></div>
+</section>
+
+<footer>Tablero generado 22/05/2026 (stock al 21/05/2026) - Fuentes: Wincampo + TrueTest + Excel maestro - AB Agro</footer>
+
+</div>
+
+<script>
+
+// Esperar a que el DOM esté listo (crítico para mobile)
+document.addEventListener("DOMContentLoaded", function() {
+
+var DATOS = {"meta": {"fecha_corte": "19/05/2026", "total_ventas": 4017, "rango_desde": "2025-01-04", "rango_hasta": "2026-05-21", "fuente": "Wincampo > Egreso Hacienda > Ventas. Incluye 15 animales del corral 920 (porque se vendieron físicamente, tienen tropa y peso real).", "truetest_procesado": "1.480 archivos, 110.296 pesadas, 15.294 animales únicos", "recategorizado": true, "animales_recategorizados": 1796}, "kpi": {"gdp_global": 0.8342764122420292, "dias_medios": 336.6094100074683, "peso_ing": 234.8106796116505, "peso_sal": 486.454070201643, "kg_ganados": 251.64339058999252, "kg_totales": 1010851.5}, "codigos_racion": {"17": "RECRÍA 1 (R1)", "18": "RECRÍA 2 (R2)", "20": "ADAPTACIÓN", "21": "TERMINACIÓN", "fuente": "Cristian Amaya AB Agro - 22/05/2026 (WhatsApp)"}, "por_categoria": [{"Categoría": "NT", "vendidos": 1891, "peso_ing": 155.55, "peso_sal": 464.75, "dias": 435.37, "gdp": 0.72, "kg_ganados": 309.2}, {"Categoría": "VA", "vendidos": 1113, "peso_ing": 426.84, "peso_sal": 555.92, "dias": 124.33, "gdp": 1.08, "kg_ganados": 129.08}, {"Categoría": "VQ", "vendidos": 1012, "peso_ing": 171.8, "peso_sal": 450.83, "dias": 385.12, "gdp": 0.78, "kg_ganados": 279.02}], "por_racion": [{"Ultima Ración": "ADAPTACION", "vendidos": 246, "peso_ing": 254.8, "peso_sal": 502.61, "dias": 292.24, "gdp": 1.0, "kg_ganados": 247.82}, {"Ultima Ración": "ADAPTACION 2", "vendidos": 291, "peso_ing": 266.72, "peso_sal": 492.74, "dias": 305.36, "gdp": 0.89, "kg_ganados": 226.02}, {"Ultima Ración": "ADAPTACION NAVE C", "vendidos": 54, "peso_ing": 129.73, "peso_sal": 452.15, "dias": 412.33, "gdp": 0.82, "kg_ganados": 322.42}, {"Ultima Ración": "DESTETE", "vendidos": 15, "peso_ing": 189.43, "peso_sal": 506.53, "dias": 438.8, "gdp": 0.79, "kg_ganados": 317.1}, {"Ultima Ración": "RECRIA", "vendidos": 414, "peso_ing": 158.34, "peso_sal": 428.89, "dias": 410.33, "gdp": 0.7, "kg_ganados": 270.55}, {"Ultima Ración": "TERMINACION", "vendidos": 2635, "peso_ing": 253.53, "peso_sal": 503.21, "dias": 324.24, "gdp": 0.86, "kg_ganados": 249.68}, {"Ultima Ración": "TERMINACION NAVE B", "vendidos": 307, "peso_ing": 167.29, "peso_sal": 406.7, "dias": 368.22, "gdp": 0.65, "kg_ganados": 239.41}, {"Ultima Ración": "TERMINACION NAVE C", "vendidos": 54, "peso_ing": 142.87, "peso_sal": 484.2, "dias": 465.28, "gdp": 0.76, "kg_ganados": 341.33}], "por_nave": [{"Nave": "920", "vendidos": 15, "peso_ing": 189.43, "peso_sal": 506.53, "dias": 438.8, "gdp": 0.79, "kg_ganados": 317.1}, {"Nave": "A", "vendidos": 3605, "peso_ing": 243.86, "peso_sal": 495.21, "dias": 330.39, "gdp": 0.85, "kg_ganados": 251.35}, {"Nave": "B", "vendidos": 397, "peso_ing": 154.36, "peso_sal": 406.17, "dias": 389.22, "gdp": 0.65, "kg_ganados": 251.8}], "matriz_nave_racion": [{"racion": "ADAPTACION", "gdp_920": null, "n_920": 0, "gdp_A": 1.0, "n_A": 245, "gdp_B": 0.0, "n_B": 1}, {"racion": "ADAPTACION 2", "gdp_920": null, "n_920": 0, "gdp_A": 0.91, "n_A": 237, "gdp_B": 0.78, "n_B": 54}, {"racion": "ADAPTACION NAVE C", "gdp_920": null, "n_920": 0, "gdp_A": 0.82, "n_A": 54, "gdp_B": null, "n_B": 0}, {"racion": "DESTETE", "gdp_920": 0.79, "n_920": 15, "gdp_A": null, "n_A": 0, "gdp_B": null, "n_B": 0}, {"racion": "RECRIA", "gdp_920": null, "n_920": 0, "gdp_A": 0.79, "n_A": 201, "gdp_B": 0.62, "n_B": 213}, {"racion": "TERMINACION", "gdp_920": null, "n_920": 0, "gdp_A": 0.86, "n_A": 2579, "gdp_B": 0.77, "n_B": 56}, {"racion": "TERMINACION NAVE B", "gdp_920": null, "n_920": 0, "gdp_A": 0.67, "n_A": 234, "gdp_B": 0.58, "n_B": 73}, {"racion": "TERMINACION NAVE C", "gdp_920": null, "n_920": 0, "gdp_A": 0.76, "n_A": 54, "gdp_B": null, "n_B": 0}], "por_mes": [{"Mes_Venta": "2025-01", "vendidos": 206, "gdp": 0.87, "dias": 337.08, "peso_sal": 484.6, "kg_ganados": 53088.0}, {"Mes_Venta": "2025-02", "vendidos": 408, "gdp": 0.85, "dias": 301.31, "peso_sal": 432.99, "kg_ganados": 87294.5}, {"Mes_Venta": "2025-03", "vendidos": 145, "gdp": 1.01, "dias": 288.79, "peso_sal": 497.07, "kg_ganados": 35240.0}, {"Mes_Venta": "2025-04", "vendidos": 248, "gdp": 1.01, "dias": 240.71, "peso_sal": 527.83, "kg_ganados": 55031.5}, {"Mes_Venta": "2025-05", "vendidos": 310, "gdp": 0.8, "dias": 343.97, "peso_sal": 479.07, "kg_ganados": 80279.0}, {"Mes_Venta": "2025-06", "vendidos": 272, "gdp": 0.85, "dias": 248.9, "peso_sal": 476.52, "kg_ganados": 50192.0}, {"Mes_Venta": "2025-07", "vendidos": 350, "gdp": 0.78, "dias": 294.86, "peso_sal": 498.43, "kg_ganados": 73901.5}, {"Mes_Venta": "2025-08", "vendidos": 262, "gdp": 0.74, "dias": 391.52, "peso_sal": 480.01, "kg_ganados": 71352.0}, {"Mes_Venta": "2025-09", "vendidos": 352, "gdp": 0.82, "dias": 316.34, "peso_sal": 496.13, "kg_ganados": 77555.5}, {"Mes_Venta": "2025-10", "vendidos": 172, "gdp": 0.75, "dias": 330.29, "peso_sal": 495.38, "kg_ganados": 40399.5}, {"Mes_Venta": "2025-11", "vendidos": 216, "gdp": 0.69, "dias": 456.93, "peso_sal": 453.94, "kg_ganados": 68686.0}, {"Mes_Venta": "2025-12", "vendidos": 104, "gdp": 0.7, "dias": 440.62, "peso_sal": 466.75, "kg_ganados": 32452.5}, {"Mes_Venta": "2026-01", "vendidos": 156, "gdp": 0.73, "dias": 452.85, "peso_sal": 485.51, "kg_ganados": 50544.0}, {"Mes_Venta": "2026-02", "vendidos": 106, "gdp": 0.8, "dias": 443.5, "peso_sal": 477.7, "kg_ganados": 36785.0}, {"Mes_Venta": "2026-03", "vendidos": 250, "gdp": 0.97, "dias": 319.19, "peso_sal": 521.86, "kg_ganados": 63911.5}, {"Mes_Venta": "2026-04", "vendidos": 304, "gdp": 0.9, "dias": 341.66, "peso_sal": 506.75, "kg_ganados": 84116.5}, {"Mes_Venta": "2026-05", "vendidos": 156, "gdp": 0.8, "dias": 410.95, "peso_sal": 506.14, "kg_ganados": 50022.5}], "tropas_peores": [{"Nº Tropa": "DESTETE SB CRIA", "vendidos": 52, "peso_ing": 197.58, "peso_sal": 444.88, "dias": 443.98, "gdp": 0.56, "kg_ganados": 247.31}, {"Nº Tropa": "TH DEL PINCEN C28", "vendidos": 30, "peso_ing": 138.7, "peso_sal": 433.7, "dias": 481.93, "gdp": 0.62, "kg_ganados": 295.0}, {"Nº Tropa": "TM PINCEN 1  09.4.24", "vendidos": 105, "peso_ing": 163.99, "peso_sal": 448.01, "dias": 448.97, "gdp": 0.63, "kg_ganados": 284.02}, {"Nº Tropa": "TH DEL PINCEN 20.11", "vendidos": 29, "peso_ing": 136.38, "peso_sal": 444.41, "dias": 488.9, "gdp": 0.64, "kg_ganados": 308.03}, {"Nº Tropa": "TH DEL PINCEN C29", "vendidos": 25, "peso_ing": 135.32, "peso_sal": 442.72, "dias": 484.24, "gdp": 0.64, "kg_ganados": 307.4}, {"Nº Tropa": "TM PINCEN 2   09.4.2", "vendidos": 106, "peso_ing": 160.63, "peso_sal": 460.38, "dias": 460.86, "gdp": 0.64, "kg_ganados": 299.75}, {"Nº Tropa": "TH DEL PINCEN C26", "vendidos": 21, "peso_ing": 137.67, "peso_sal": 445.24, "dias": 481.43, "gdp": 0.65, "kg_ganados": 307.57}, {"Nº Tropa": "TM DEL PINCEN ", "vendidos": 104, "peso_ing": 143.85, "peso_sal": 450.42, "dias": 472.84, "gdp": 0.65, "kg_ganados": 306.57}, {"Nº Tropa": "TM PINCEN 10.4.24", "vendidos": 125, "peso_ing": 149.96, "peso_sal": 447.9, "dias": 461.25, "gdp": 0.65, "kg_ganados": 297.95}, {"Nº Tropa": "TERNEROS DE LA ADELA", "vendidos": 60, "peso_ing": 139.86, "peso_sal": 466.35, "dias": 498.17, "gdp": 0.66, "kg_ganados": 326.49}, {"Nº Tropa": "TM PINCEN 12.5.202..", "vendidos": 93, "peso_ing": 133.64, "peso_sal": 448.75, "dias": 473.05, "gdp": 0.67, "kg_ganados": 315.11}, {"Nº Tropa": "TM PINCEN 12.5.24", "vendidos": 95, "peso_ing": 131.88, "peso_sal": 442.49, "dias": 462.17, "gdp": 0.67, "kg_ganados": 310.62}, {"Nº Tropa": "TM PINCEN 12.5.2024", "vendidos": 95, "peso_ing": 129.02, "peso_sal": 444.04, "dias": 468.38, "gdp": 0.68, "kg_ganados": 315.02}, {"Nº Tropa": "TM PINCEN 12.5.2024.", "vendidos": 98, "peso_ing": 129.98, "peso_sal": 445.99, "dias": 467.53, "gdp": 0.68, "kg_ganados": 316.01}, {"Nº Tropa": "TH DEL PINCEN 17.6.2", "vendidos": 101, "peso_ing": 122.23, "peso_sal": 435.24, "dias": 464.88, "gdp": 0.69, "kg_ganados": 313.0}], "tropas_mejores": [{"Nº Tropa": "VACA PINCEN C15", "vendidos": 60, "peso_ing": 322.98, "peso_sal": 548.25, "dias": 201.28, "gdp": 1.34, "kg_ganados": 225.27}, {"Nº Tropa": "VACA PINCEN C16", "vendidos": 66, "peso_ing": 310.42, "peso_sal": 535.36, "dias": 208.18, "gdp": 1.32, "kg_ganados": 224.95}, {"Nº Tropa": "VQ Y VA DEL PINCEN", "vendidos": 45, "peso_ing": 374.71, "peso_sal": 510.09, "dias": 105.62, "gdp": 1.3, "kg_ganados": 135.38}, {"Nº Tropa": "VACA DEL DESCANSO2", "vendidos": 39, "peso_ing": 458.67, "peso_sal": 593.23, "dias": 111.92, "gdp": 1.22, "kg_ganados": 134.56}, {"Nº Tropa": "VACA PINCEN C14", "vendidos": 49, "peso_ing": 404.1, "peso_sal": 559.2, "dias": 132.24, "gdp": 1.21, "kg_ganados": 155.1}, {"Nº Tropa": "VACA VIEJA DEL DES2", "vendidos": 34, "peso_ing": 451.97, "peso_sal": 579.35, "dias": 108.62, "gdp": 1.18, "kg_ganados": 127.38}, {"Nº Tropa": "VACA DEL DESCANSO1", "vendidos": 43, "peso_ing": 455.14, "peso_sal": 581.56, "dias": 111.77, "gdp": 1.16, "kg_ganados": 126.42}, {"Nº Tropa": "VACA DEL PINCEN C26", "vendidos": 50, "peso_ing": 386.54, "peso_sal": 552.64, "dias": 151.7, "gdp": 1.16, "kg_ganados": 166.1}, {"Nº Tropa": "VACA 4 PINCEN 14.6", "vendidos": 54, "peso_ing": 450.19, "peso_sal": 564.52, "dias": 102.3, "gdp": 1.15, "kg_ganados": 114.33}, {"Nº Tropa": "VACAS PINCEN 6.2.25", "vendidos": 43, "peso_ing": 462.56, "peso_sal": 569.3, "dias": 93.19, "gdp": 1.14, "kg_ganados": 106.74}, {"Nº Tropa": "TROPA VACAS NHF 27.9", "vendidos": 47, "peso_ing": 370.83, "peso_sal": 548.72, "dias": 171.06, "gdp": 1.13, "kg_ganados": 177.89}, {"Nº Tropa": "VQ DEL PINCEN 30.10.", "vendidos": 91, "peso_ing": 276.49, "peso_sal": 437.9, "dias": 156.68, "gdp": 1.11, "kg_ganados": 161.41}, {"Nº Tropa": "VACAS  FERIA NHF 29.", "vendidos": 48, "peso_ing": 357.35, "peso_sal": 520.02, "dias": 161.42, "gdp": 1.07, "kg_ganados": 162.67}, {"Nº Tropa": "VACA 3 PINCEN 14.6", "vendidos": 49, "peso_ing": 439.78, "peso_sal": 544.78, "dias": 103.84, "gdp": 1.06, "kg_ganados": 105.0}, {"Nº Tropa": "VACA VIEJA DEL DES1", "vendidos": 31, "peso_ing": 463.74, "peso_sal": 567.81, "dias": 99.94, "gdp": 1.06, "kg_ganados": 104.06}], "salidos_en_recria": [{"Nº Tropa": "TH PINCEN 17.6.2024", "vendidos": 32, "peso_ing": 119.59, "peso_sal": 432.75, "dias": 467.91, "gdp": 0.67}, {"Nº Tropa": "TM PINCEN 12.5.2024", "vendidos": 29, "peso_ing": 119.62, "peso_sal": 391.34, "dias": 429.07, "gdp": 0.63}, {"Nº Tropa": "TH DEL PINCEN 17.6.2", "vendidos": 27, "peso_ing": 115.37, "peso_sal": 429.85, "dias": 473.15, "gdp": 0.67}, {"Nº Tropa": "TM PINCEN 12.5.24", "vendidos": 25, "peso_ing": 125.98, "peso_sal": 390.6, "dias": 420.52, "gdp": 0.63}, {"Nº Tropa": "TM DEL PINCEN ", "vendidos": 22, "peso_ing": 133.68, "peso_sal": 408.27, "dias": 468.45, "gdp": 0.58}, {"Nº Tropa": "TM PINCEN 12.5.2024.", "vendidos": 21, "peso_ing": 126.98, "peso_sal": 389.19, "dias": 424.71, "gdp": 0.61}, {"Nº Tropa": "TM/TH PINCEN 6.9.24", "vendidos": 20, "peso_ing": 113.6, "peso_sal": 434.95, "dias": 468.0, "gdp": 0.69}, {"Nº Tropa": "VQ DEL PINCEN 30.10.", "vendidos": 19, "peso_ing": 284.68, "peso_sal": 443.47, "dias": 137.0, "gdp": 1.16}, {"Nº Tropa": "TM PINCEN 10.4.24", "vendidos": 19, "peso_ing": 137.32, "peso_sal": 420.95, "dias": 479.05, "gdp": 0.59}, {"Nº Tropa": "TM PINCEN 12.5.202..", "vendidos": 18, "peso_ing": 118.5, "peso_sal": 373.78, "dias": 417.33, "gdp": 0.61}, {"Nº Tropa": "TM PINCEN 1  09.4.24", "vendidos": 17, "peso_ing": 146.18, "peso_sal": 417.82, "dias": 475.12, "gdp": 0.57}, {"Nº Tropa": "VACAS PINCEN 16.06 ", "vendidos": 14, "peso_ing": 480.79, "peso_sal": 565.57, "dias": 69.0, "gdp": 1.23}, {"Nº Tropa": "TM PINCEN 2   09.4.2", "vendidos": 14, "peso_ing": 144.32, "peso_sal": 441.93, "dias": 483.07, "gdp": 0.61}, {"Nº Tropa": "T.T DEL PINCEN 28.9.", "vendidos": 14, "peso_ing": 90.36, "peso_sal": 438.79, "dias": 462.0, "gdp": 0.75}, {"Nº Tropa": "T/T PINCEN 6.9.24", "vendidos": 11, "peso_ing": 118.18, "peso_sal": 436.45, "dias": 464.64, "gdp": 0.69}, {"Nº Tropa": "GANAD GRAL ACHA 5", "vendidos": 11, "peso_ing": 142.45, "peso_sal": 411.45, "dias": 434.91, "gdp": 0.61}, {"Nº Tropa": "TROPA PINCEN 15.8.25", "vendidos": 10, "peso_ing": 309.7, "peso_sal": 448.1, "dias": 141.6, "gdp": 0.97}, {"Nº Tropa": "T/T DEL PINCEN 2025", "vendidos": 8, "peso_ing": 136.81, "peso_sal": 467.0, "dias": 401.0, "gdp": 0.83}, {"Nº Tropa": "TH DEL PINCEN C28", "vendidos": 7, "peso_ing": 137.43, "peso_sal": 438.43, "dias": 487.0, "gdp": 0.62}, {"Nº Tropa": "T/T DEL PINCEN 31.10", "vendidos": 7, "peso_ing": 126.93, "peso_sal": 438.71, "dias": 437.0, "gdp": 0.71}, {"Nº Tropa": "TH DEL PINCEN 20.11", "vendidos": 7, "peso_ing": 131.5, "peso_sal": 443.71, "dias": 482.0, "gdp": 0.65}, {"Nº Tropa": "TM.TH DEL PINCEN 28.", "vendidos": 7, "peso_ing": 87.79, "peso_sal": 435.71, "dias": 445.14, "gdp": 0.8}, {"Nº Tropa": "DESTETE SB CRIA", "vendidos": 5, "peso_ing": 181.5, "peso_sal": 447.6, "dias": 546.2, "gdp": 0.49}, {"Nº Tropa": "TH DEL PINCEN C27", "vendidos": 5, "peso_ing": 142.8, "peso_sal": 463.4, "dias": 487.0, "gdp": 0.66}, {"Nº Tropa": "VACA PINCEN C16", "vendidos": 5, "peso_ing": 157.4, "peso_sal": 433.0, "dias": 390.0, "gdp": 0.71}], "ventas_920": {"cantidad": 15, "gdp_medio": 0.7887616208351568, "dias_medios": 438.8, "detalle": [{"Caravana": "32010001244806", "Categoría": "TM", "Nº Tropa": "16.6.23 TM PINCEN", "Días": 612, "Peso_Ing": 164.5, "Peso_Sal": 480, "GDP": 0.52}, {"Caravana": "964001021029520", "Categoría": "TH", "Nº Tropa": "DESTETE SB CRIA", "Días": 310, "Peso_Ing": 180.5, "Peso_Sal": 470, "GDP": 0.93}, {"Caravana": "964001022072759", "Categoría": "VQ", "Nº Tropa": "SB CRIA 30.3.23", "Días": 798, "Peso_Ing": 124.5, "Peso_Sal": 550, "GDP": 0.53}, {"Caravana": "964001007971536", "Categoría": "TH", "Nº Tropa": "T/T DEL PINCEN 2025", "Días": 293, "Peso_Ing": 192.5, "Peso_Sal": 440, "GDP": 0.84}, {"Caravana": "964001022051152", "Categoría": "TH", "Nº Tropa": "TH DEL PINCEN C25", "Días": 432, "Peso_Ing": 144.0, "Peso_Sal": 464, "GDP": 0.74}, {"Caravana": "32010001244748", "Categoría": "TM", "Nº Tropa": "TM DEL PINCEN 3", "Días": 474, "Peso_Ing": 151.0, "Peso_Sal": 465, "GDP": 0.66}, {"Caravana": "32010001246639", "Categoría": "NT", "Nº Tropa": "TM DEL PINCEN 30.11.", "Días": 445, "Peso_Ing": 153.0, "Peso_Sal": 470, "GDP": 0.71}, {"Caravana": "964001007971522", "Categoría": "TM", "Nº Tropa": "TM DEL PINCEN 4", "Días": 474, "Peso_Ing": 171.5, "Peso_Sal": 490, "GDP": 0.67}, {"Caravana": "964001007974358", "Categoría": "TM", "Nº Tropa": "TM PINCEN 10.4.24", "Días": 589, "Peso_Ing": 91.5, "Peso_Sal": 475, "GDP": 0.65}, {"Caravana": "964001010050943", "Categoría": "TM", "Nº Tropa": "TM PINCEN 12.5.2024", "Días": 270, "Peso_Ing": 133.5, "Peso_Sal": 600, "GDP": 1.73}, {"Caravana": "32010007684621", "Categoría": "VA", "Nº Tropa": "VACA 2 PINCEN 13.06", "Días": 226, "Peso_Ing": 428.0, "Peso_Sal": 584, "GDP": 0.69}, {"Caravana": "964001017434295", "Categoría": "VA", "Nº Tropa": "VACAS PINCEN 26.01", "Días": 537, "Peso_Ing": 354.0, "Peso_Sal": 666, "GDP": 0.58}, {"Caravana": "964001010051193", "Categoría": "VQ", "Nº Tropa": "VQ DEL PINCEN 30.10.", "Días": 82, "Peso_Ing": 335.0, "Peso_Sal": 418, "GDP": 1.01}, {"Caravana": "964001021040061", "Categoría": "NT", "Nº Tropa": "T.T DEL PINCEN 28.9.", "Días": 558, "Peso_Ing": 96.0, "Peso_Sal": 528, "GDP": 0.77}, {"Caravana": "964001022071761", "Categoría": "TM", "Nº Tropa": "T/T DEL PINCEN 2025", "Días": 482, "Peso_Ing": 122.0, "Peso_Sal": 498, "GDP": 0.78}]}, "validacion_truetest": {"animales_vendidos": 4017, "animales_matcheados_truetest": 3963, "pct_matcheo": 100.0, "animales_con_pesada_cercana_ingreso": 3194, "animales_peso_identico": 3145, "pct_peso_identico": 98.5, "animales_con_pesadas_previas_ingreso": 2799, "pct_pesadas_previas": 69.7}, "comparativa_origen": [{"categoria": "NT", "n_comp": 244, "gdp_comp": 0.781, "dias_comp": 437.0, "peso_ing_comp": 158.8, "n_cria": 1647, "gdp_cria": 0.706, "dias_cria": 435.0, "peso_ing_cria": 155.1}, {"categoria": "VQ", "n_comp": 155, "gdp_comp": 1.01, "dias_comp": 248.0, "peso_ing_comp": 247.0, "n_cria": 857, "gdp_cria": 0.743, "dias_cria": 410.0, "peso_ing_cria": 158.2}, {"categoria": "VA", "n_comp": 818, "gdp_comp": 1.071, "dias_comp": 119.0, "peso_ing_comp": 435.4, "n_cria": 295, "gdp_cria": 1.112, "dias_cria": 140.0, "peso_ing_cria": 403.1}], "supuestos": {"fecha_reporte": "22/05/2026", "gdp_recria": 0.7, "gdp_term": 1.1, "peso_paso": 300, "categorias": {"TH": {"nombre": "TH (Ternera)", "precio": 8000, "peso_obj": 450, "rendim": 0.55, "desbaste": 0.93, "iva": 1.105}, "VQ": {"nombre": "VQ (Vaquillona)", "precio": 8000, "peso_obj": 450, "rendim": 0.55, "desbaste": 0.93, "iva": 1.105}, "TM": {"nombre": "TM (Novillito)", "precio": 8050, "peso_obj": 500, "rendim": 0.55, "desbaste": 0.93, "iva": 1.105}, "NT": {"nombre": "NT (Ternero)", "precio": 8050, "peso_obj": 500, "rendim": 0.55, "desbaste": 0.93, "iva": 1.105}, "VA": {"nombre": "VA (Vaca)", "precio": 7350, "peso_obj": 550, "rendim": 0.55, "desbaste": 0.92, "iva": 1.105}}, "fecha_stock": "21/05/2026"}, "stock_v2": {"fecha_reporte": "19/05/2026", "campos": {"25_de_mayo": {"nombre": "25 de Mayo (Feedlot)", "cabezas": 2644, "lotes": 620, "kg_proyectado": 777741.95, "venta_proyectada": 5704011096.7125, "por_categoria": [{"Categoria": "NT", "cabezas": 13, "lotes": 12, "venta": 29574482.4375}, {"Categoria": "TH", "cabezas": 1273, "lotes": 280, "venta": 2590232931.0000005}, {"Categoria": "TM", "cabezas": 1204, "lotes": 298, "venta": 2739052065.75}, {"Categoria": "VA", "cabezas": 141, "lotes": 21, "venta": 318699906.52500004}, {"Categoria": "VQ", "cabezas": 13, "lotes": 9, "venta": 26451711.000000004}]}, "winifreda": {"nombre": "Winifreda (Cría)", "stock_actual": {"vacas": 1680, "toros": 50, "vaq_preñadas": 280, "terneras": 27, "terneros": 26, "total": 2063}, "eventos_pendientes": 9, "cabezas_pendientes": 1731, "venta_proyectada": 7145459295.0, "eventos": [{"ID": 1, "Evento": "Terneras actuales Winifreda", "Cab. estim.": 27, "Cat.": "TH", "Peso ing. (kg)": 110.0, "Fecha ingreso plan.": "2026-05-20", "fecha_salida": "2027-07-01", "venta_total": 99887580.0}, {"ID": 2, "Evento": "Terneros actuales Winifreda", "Cab. estim.": 26, "Cat.": "TM", "Peso ing. (kg)": 123.0, "Fecha ingreso plan.": "2026-05-20", "fecha_salida": "2027-07-28", "venta_total": 107543572.5}, {"ID": 4, "Evento": "Vacas vacías (2ª tanda)", "Cab. estim.": 100, "Cat.": "VA", "Peso ing. (kg)": 430.0, "Fecha ingreso plan.": "2026-06-15", "fecha_salida": "2026-10-02", "venta_total": 410960550.0}, {"ID": 5, "Evento": "Terneros parición vaq preñadas (abr 26)", "Cab. estim.": 84, "Cat.": "NT", "Peso ing. (kg)": 100.0, "Fecha ingreso plan.": "2026-07-15", "fecha_salida": "2027-10-25", "venta_total": 347448465.0}, {"ID": 6, "Evento": "Terneros parición vaq preñadas (may 26)", "Cab. estim.": 83, "Cat.": "NT", "Peso ing. (kg)": 100.0, "Fecha ingreso plan.": "2026-08-15", "fecha_salida": "2027-11-25", "venta_total": 343312173.75}, {"ID": 7, "Evento": "Terneros parición vaq preñadas (jun 26)", "Cab. estim.": 83, "Cat.": "NT", "Peso ing. (kg)": 100.0, "Fecha ingreso plan.": "2026-09-15", "fecha_salida": "2027-12-26", "venta_total": 343312173.75}, {"ID": 8, "Evento": "Terneros parición vacas (sep 26)", "Cab. estim.": 443, "Cat.": "NT", "Peso ing. (kg)": 100.0, "Fecha ingreso plan.": "2026-12-15", "fecha_salida": "2028-03-26", "venta_total": 1832377023.75}, {"ID": 9, "Evento": "Terneros parición vacas (oct 26)", "Cab. estim.": 443, "Cat.": "NT", "Peso ing. (kg)": 100.0, "Fecha ingreso plan.": "2027-01-15", "fecha_salida": "2028-04-26", "venta_total": 1832377023.75}, {"ID": 10, "Evento": "Terneros parición vacas (nov 26)", "Cab. estim.": 442, "Cat.": "NT", "Peso ing. (kg)": 100.0, "Fecha ingreso plan.": "2027-02-15", "fecha_salida": "2028-05-27", "venta_total": 1828240732.5}]}}}, "lotes_proy": [{"campo": "25 de Mayo", "corral": "C29", "cabezas": 2, "categoria": "TH", "mes_salida": "2026-11", "venta_orig": 4069494.0000000005}, {"campo": "25 de Mayo", "corral": "C29", "cabezas": 4, "categoria": "TH", "mes_salida": "2026-12", "venta_orig": 8138988.000000001}, {"campo": "25 de Mayo", "corral": "C29", "cabezas": 2, "categoria": "TH", "mes_salida": "2026-12", "venta_orig": 4069494.0000000005}, {"campo": "25 de Mayo", "corral": "C29", "cabezas": 4, "categoria": "TH", "mes_salida": "2026-12", "venta_orig": 8138988.000000001}, {"campo": "25 de Mayo", "corral": "C29", "cabezas": 5, "categoria": "TH", "mes_salida": "2026-12", "venta_orig": 10173735.0}, {"campo": "25 de Mayo", "corral": "C29", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-11", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "C29", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-11", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C29", "cabezas": 1, "categoria": "TM", "mes_salida": "2027-02", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C29", "cabezas": 14, "categoria": "TM", "mes_salida": "2027-01", "venta_orig": 31849442.625000004}, {"campo": "25 de Mayo", "corral": "C29", "cabezas": 6, "categoria": "TM", "mes_salida": "2027-02", "venta_orig": 13649761.125000002}, {"campo": "25 de Mayo", "corral": "C29", "cabezas": 18, "categoria": "TM", "mes_salida": "2027-01", "venta_orig": 40949283.375}, {"campo": "25 de Mayo", "corral": "C29", "cabezas": 1, "categoria": "TM", "mes_salida": "2027-01", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C29", "cabezas": 2, "categoria": "TM", "mes_salida": "2027-01", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "C29", "cabezas": 6, "categoria": "TM", "mes_salida": "2027-01", "venta_orig": 13649761.125000002}, {"campo": "25 de Mayo", "corral": "C29", "cabezas": 3, "categoria": "TM", "mes_salida": "2026-12", "venta_orig": 6824880.562500001}, {"campo": "25 de Mayo", "corral": "C28", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-10", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "C28", "cabezas": 3, "categoria": "TH", "mes_salida": "2026-12", "venta_orig": 6104241.000000001}, {"campo": "25 de Mayo", "corral": "C28", "cabezas": 4, "categoria": "TH", "mes_salida": "2026-11", "venta_orig": 8138988.000000001}, {"campo": "25 de Mayo", "corral": "C28", "cabezas": 3, "categoria": "TH", "mes_salida": "2026-12", "venta_orig": 6104241.000000001}, {"campo": "25 de Mayo", "corral": "C28", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-10", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "C28", "cabezas": 3, "categoria": "TH", "mes_salida": "2026-12", "venta_orig": 6104241.000000001}, {"campo": "25 de Mayo", "corral": "C28", "cabezas": 2, "categoria": "TH", "mes_salida": "2026-11", "venta_orig": 4069494.0000000005}, {"campo": "25 de Mayo", "corral": "C28", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-10", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C28", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-10", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C28", "cabezas": 8, "categoria": "TM", "mes_salida": "2027-01", "venta_orig": 18199681.5}, {"campo": "25 de Mayo", "corral": "C28", "cabezas": 6, "categoria": "TM", "mes_salida": "2027-01", "venta_orig": 13649761.125000002}, {"campo": "25 de Mayo", "corral": "C28", "cabezas": 9, "categoria": "TM", "mes_salida": "2027-01", "venta_orig": 20474641.6875}, {"campo": "25 de Mayo", "corral": "C28", "cabezas": 2, "categoria": "TM", "mes_salida": "2026-12", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "C28", "cabezas": 1, "categoria": "TM", "mes_salida": "2027-01", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C28", "cabezas": 1, "categoria": "TM", "mes_salida": "2027-01", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C28", "cabezas": 9, "categoria": "TM", "mes_salida": "2026-12", "venta_orig": 20474641.6875}, {"campo": "25 de Mayo", "corral": "C28", "cabezas": 2, "categoria": "TM", "mes_salida": "2026-12", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "C27", "cabezas": 4, "categoria": "TH", "mes_salida": "2026-05", "venta_orig": 8138988.000000001}, {"campo": "25 de Mayo", "corral": "C27", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-05", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "C27", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-06", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C27", "cabezas": 10, "categoria": "VA", "mes_salida": "2026-05", "venta_orig": 22602830.250000004}, {"campo": "25 de Mayo", "corral": "C27", "cabezas": 4, "categoria": "VA", "mes_salida": "2026-05", "venta_orig": 9041132.1}, {"campo": "25 de Mayo", "corral": "C27", "cabezas": 2, "categoria": "VA", "mes_salida": "2026-05", "venta_orig": 4520566.05}, {"campo": "25 de Mayo", "corral": "C27", "cabezas": 5, "categoria": "VA", "mes_salida": "2026-05", "venta_orig": 11301415.125000002}, {"campo": "25 de Mayo", "corral": "C27", "cabezas": 8, "categoria": "VA", "mes_salida": "2026-05", "venta_orig": 18082264.2}, {"campo": "25 de Mayo", "corral": "C26", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-05", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "C26", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-06", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C26", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-05", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C26", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-05", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C26", "cabezas": 7, "categoria": "VA", "mes_salida": "2026-05", "venta_orig": 15821981.175000003}, {"campo": "25 de Mayo", "corral": "C26", "cabezas": 2, "categoria": "VA", "mes_salida": "2026-05", "venta_orig": 4520566.05}, {"campo": "25 de Mayo", "corral": "C26", "cabezas": 10, "categoria": "VA", "mes_salida": "2026-05", "venta_orig": 22602830.250000004}, {"campo": "25 de Mayo", "corral": "C26", "cabezas": 7, "categoria": "VA", "mes_salida": "2026-06", "venta_orig": 15821981.175000003}, {"campo": "25 de Mayo", "corral": "C25", "cabezas": 1, "categoria": "TH", "mes_salida": "2027-02", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "C25", "cabezas": 28, "categoria": "TH", "mes_salida": "2027-03", "venta_orig": 56972916.000000015}, {"campo": "25 de Mayo", "corral": "C25", "cabezas": 1, "categoria": "TH", "mes_salida": "2027-03", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "C25", "cabezas": 1, "categoria": "TH", "mes_salida": "2027-02", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "C25", "cabezas": 5, "categoria": "TH", "mes_salida": "2027-03", "venta_orig": 10173735.0}, {"campo": "25 de Mayo", "corral": "C25", "cabezas": 19, "categoria": "TM", "mes_salida": "2027-05", "venta_orig": 43224243.5625}, {"campo": "25 de Mayo", "corral": "C25", "cabezas": 8, "categoria": "TM", "mes_salida": "2027-05", "venta_orig": 18199681.5}, {"campo": "25 de Mayo", "corral": "C24", "cabezas": 1, "categoria": "TH", "mes_salida": "2027-02", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "C24", "cabezas": 31, "categoria": "TH", "mes_salida": "2027-04", "venta_orig": 63077157.00000001}, {"campo": "25 de Mayo", "corral": "C24", "cabezas": 1, "categoria": "TM", "mes_salida": "2027-05", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C24", "cabezas": 32, "categoria": "TM", "mes_salida": "2027-05", "venta_orig": 72798726.0}, {"campo": "25 de Mayo", "corral": "C23", "cabezas": 2, "categoria": "TH", "mes_salida": "2026-06", "venta_orig": 4069494.0000000005}, {"campo": "25 de Mayo", "corral": "C23", "cabezas": 2, "categoria": "TH", "mes_salida": "2026-05", "venta_orig": 4069494.0000000005}, {"campo": "25 de Mayo", "corral": "C23", "cabezas": 2, "categoria": "TH", "mes_salida": "2026-05", "venta_orig": 4069494.0000000005}, {"campo": "25 de Mayo", "corral": "C23", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-06", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "C23", "cabezas": 2, "categoria": "TH", "mes_salida": "2026-05", "venta_orig": 4069494.0000000005}, {"campo": "25 de Mayo", "corral": "C23", "cabezas": 2, "categoria": "TH", "mes_salida": "2026-06", "venta_orig": 4069494.0000000005}, {"campo": "25 de Mayo", "corral": "C23", "cabezas": 3, "categoria": "TH", "mes_salida": "2026-06", "venta_orig": 6104241.000000001}, {"campo": "25 de Mayo", "corral": "C23", "cabezas": 4, "categoria": "TH", "mes_salida": "2026-06", "venta_orig": 8138988.000000001}, {"campo": "25 de Mayo", "corral": "C23", "cabezas": 2, "categoria": "TH", "mes_salida": "2026-06", "venta_orig": 4069494.0000000005}, {"campo": "25 de Mayo", "corral": "C23", "cabezas": 4, "categoria": "TH", "mes_salida": "2026-06", "venta_orig": 8138988.000000001}, {"campo": "25 de Mayo", "corral": "C23", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-06", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "C23", "cabezas": 3, "categoria": "TH", "mes_salida": "2026-05", "venta_orig": 6104241.000000001}, {"campo": "25 de Mayo", "corral": "C23", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-05", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C23", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-07", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C23", "cabezas": 6, "categoria": "TM", "mes_salida": "2026-08", "venta_orig": 13649761.125000002}, {"campo": "25 de Mayo", "corral": "C23", "cabezas": 2, "categoria": "TM", "mes_salida": "2026-07", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "C23", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-08", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C23", "cabezas": 3, "categoria": "TM", "mes_salida": "2026-07", "venta_orig": 6824880.562500001}, {"campo": "25 de Mayo", "corral": "C23", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-05", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C23", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-07", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C22", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-05", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "C22", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-05", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "C22", "cabezas": 2, "categoria": "TM", "mes_salida": "2026-05", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "C22", "cabezas": 2, "categoria": "TM", "mes_salida": "2026-06", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "C22", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-05", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C22", "cabezas": 2, "categoria": "TM", "mes_salida": "2026-05", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "C22", "cabezas": 1, "categoria": "VA", "mes_salida": "2026-09", "venta_orig": 2260283.025}, {"campo": "25 de Mayo", "corral": "C22", "cabezas": 5, "categoria": "VA", "mes_salida": "2026-05", "venta_orig": 11301415.125000002}, {"campo": "25 de Mayo", "corral": "C22", "cabezas": 12, "categoria": "VA", "mes_salida": "2026-05", "venta_orig": 27123396.300000004}, {"campo": "25 de Mayo", "corral": "C22", "cabezas": 4, "categoria": "VA", "mes_salida": "2026-05", "venta_orig": 9041132.1}, {"campo": "25 de Mayo", "corral": "C21", "cabezas": 3, "categoria": "TH", "mes_salida": "2027-04", "venta_orig": 6104241.000000001}, {"campo": "25 de Mayo", "corral": "C21", "cabezas": 4, "categoria": "TH", "mes_salida": "2027-05", "venta_orig": 8138988.000000001}, {"campo": "25 de Mayo", "corral": "C21", "cabezas": 3, "categoria": "TH", "mes_salida": "2027-03", "venta_orig": 6104241.000000001}, {"campo": "25 de Mayo", "corral": "C21", "cabezas": 1, "categoria": "TH", "mes_salida": "2027-04", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "C21", "cabezas": 4, "categoria": "TH", "mes_salida": "2027-05", "venta_orig": 8138988.000000001}, {"campo": "25 de Mayo", "corral": "C21", "cabezas": 1, "categoria": "TH", "mes_salida": "2027-05", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "C21", "cabezas": 10, "categoria": "TH", "mes_salida": "2027-05", "venta_orig": 20347470.0}, {"campo": "25 de Mayo", "corral": "C21", "cabezas": 6, "categoria": "TH", "mes_salida": "2027-05", "venta_orig": 12208482.000000002}, {"campo": "25 de Mayo", "corral": "C21", "cabezas": 1, "categoria": "TH", "mes_salida": "2027-04", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "C21", "cabezas": 5, "categoria": "TH", "mes_salida": "2027-04", "venta_orig": 10173735.0}, {"campo": "25 de Mayo", "corral": "C21", "cabezas": 1, "categoria": "TM", "mes_salida": "2027-06", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C21", "cabezas": 2, "categoria": "TM", "mes_salida": "2027-06", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "C21", "cabezas": 2, "categoria": "TM", "mes_salida": "2027-06", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "C21", "cabezas": 2, "categoria": "TM", "mes_salida": "2027-06", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "C21", "cabezas": 3, "categoria": "TM", "mes_salida": "2027-06", "venta_orig": 6824880.562500001}, {"campo": "25 de Mayo", "corral": "C21", "cabezas": 3, "categoria": "TM", "mes_salida": "2027-06", "venta_orig": 6824880.562500001}, {"campo": "25 de Mayo", "corral": "C21", "cabezas": 1, "categoria": "TM", "mes_salida": "2027-07", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C20", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-05", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "C20", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-05", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "C20", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-05", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "C20", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-05", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "C20", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-05", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "C20", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-05", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "C20", "cabezas": 2, "categoria": "TH", "mes_salida": "2026-05", "venta_orig": 4069494.0000000005}, {"campo": "25 de Mayo", "corral": "C20", "cabezas": 2, "categoria": "TM", "mes_salida": "2026-05", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "C20", "cabezas": 3, "categoria": "TM", "mes_salida": "2026-06", "venta_orig": 6824880.562500001}, {"campo": "25 de Mayo", "corral": "C20", "cabezas": 5, "categoria": "TM", "mes_salida": "2026-06", "venta_orig": 11374800.9375}, {"campo": "25 de Mayo", "corral": "C20", "cabezas": 2, "categoria": "TM", "mes_salida": "2026-06", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "C20", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-05", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C20", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-05", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C20", "cabezas": 4, "categoria": "TM", "mes_salida": "2026-06", "venta_orig": 9099840.75}, {"campo": "25 de Mayo", "corral": "C20", "cabezas": 4, "categoria": "TM", "mes_salida": "2026-06", "venta_orig": 9099840.75}, {"campo": "25 de Mayo", "corral": "C20", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-05", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C20", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-05", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C20", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-06", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C20", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-06", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C20", "cabezas": 2, "categoria": "TM", "mes_salida": "2026-06", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "C20", "cabezas": 4, "categoria": "TM", "mes_salida": "2026-06", "venta_orig": 9099840.75}, {"campo": "25 de Mayo", "corral": "C20", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-06", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C20", "cabezas": 2, "categoria": "TM", "mes_salida": "2026-06", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "C20", "cabezas": 1, "categoria": "VQ", "mes_salida": "2026-05", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "C20", "cabezas": 1, "categoria": "VQ", "mes_salida": "2026-05", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "C19", "cabezas": 3, "categoria": "TH", "mes_salida": "2027-04", "venta_orig": 6104241.000000001}, {"campo": "25 de Mayo", "corral": "C19", "cabezas": 15, "categoria": "TH", "mes_salida": "2027-05", "venta_orig": 30521205.000000004}, {"campo": "25 de Mayo", "corral": "C19", "cabezas": 1, "categoria": "TH", "mes_salida": "2027-03", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "C19", "cabezas": 2, "categoria": "TH", "mes_salida": "2027-05", "venta_orig": 4069494.0000000005}, {"campo": "25 de Mayo", "corral": "C19", "cabezas": 2, "categoria": "TH", "mes_salida": "2027-01", "venta_orig": 4069494.0000000005}, {"campo": "25 de Mayo", "corral": "C19", "cabezas": 20, "categoria": "TH", "mes_salida": "2027-05", "venta_orig": 40694940.0}, {"campo": "25 de Mayo", "corral": "C19", "cabezas": 1, "categoria": "TH", "mes_salida": "2027-03", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "C19", "cabezas": 2, "categoria": "TM", "mes_salida": "2027-04", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "C19", "cabezas": 1, "categoria": "TM", "mes_salida": "2027-04", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C19", "cabezas": 1, "categoria": "TM", "mes_salida": "2027-05", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C19", "cabezas": 1, "categoria": "TM", "mes_salida": "2027-05", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C19", "cabezas": 1, "categoria": "TM", "mes_salida": "2027-01", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C19", "cabezas": 5, "categoria": "TM", "mes_salida": "2027-07", "venta_orig": 11374800.9375}, {"campo": "25 de Mayo", "corral": "C19", "cabezas": 17, "categoria": "TM", "mes_salida": "2027-07", "venta_orig": 38674323.1875}, {"campo": "25 de Mayo", "corral": "C19", "cabezas": 8, "categoria": "TM", "mes_salida": "2027-08", "venta_orig": 18199681.5}, {"campo": "25 de Mayo", "corral": "C19", "cabezas": 3, "categoria": "TM", "mes_salida": "2027-03", "venta_orig": 6824880.562500001}, {"campo": "25 de Mayo", "corral": "C19", "cabezas": 1, "categoria": "TM", "mes_salida": "2027-03", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C19", "cabezas": 1, "categoria": "TM", "mes_salida": "2027-05", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C18", "cabezas": 1, "categoria": "NT", "mes_salida": "2026-05", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C18", "cabezas": 2, "categoria": "NT", "mes_salida": "2026-05", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "C18", "cabezas": 1, "categoria": "NT", "mes_salida": "2026-05", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C18", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-05", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C18", "cabezas": 1, "categoria": "VA", "mes_salida": "2026-05", "venta_orig": 2260283.025}, {"campo": "25 de Mayo", "corral": "C18", "cabezas": 1, "categoria": "VA", "mes_salida": "2026-05", "venta_orig": 2260283.025}, {"campo": "25 de Mayo", "corral": "C18", "cabezas": 1, "categoria": "VA", "mes_salida": "2026-05", "venta_orig": 2260283.025}, {"campo": "25 de Mayo", "corral": "C18", "cabezas": 1, "categoria": "VA", "mes_salida": "2026-05", "venta_orig": 2260283.025}, {"campo": "25 de Mayo", "corral": "C18", "cabezas": 2, "categoria": "VA", "mes_salida": "2026-11", "venta_orig": 4520566.05}, {"campo": "25 de Mayo", "corral": "C18", "cabezas": 2, "categoria": "VA", "mes_salida": "2026-10", "venta_orig": 4520566.05}, {"campo": "25 de Mayo", "corral": "C18", "cabezas": 1, "categoria": "VQ", "mes_salida": "2026-05", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "C3", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-06", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "C3", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-07", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "C3", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-07", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "C3", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-07", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "C3", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-06", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "C3", "cabezas": 2, "categoria": "TH", "mes_salida": "2026-07", "venta_orig": 4069494.0000000005}, {"campo": "25 de Mayo", "corral": "C3", "cabezas": 4, "categoria": "TH", "mes_salida": "2026-07", "venta_orig": 8138988.000000001}, {"campo": "25 de Mayo", "corral": "C3", "cabezas": 3, "categoria": "TH", "mes_salida": "2026-07", "venta_orig": 6104241.000000001}, {"campo": "25 de Mayo", "corral": "C3", "cabezas": 6, "categoria": "TH", "mes_salida": "2026-07", "venta_orig": 12208482.000000002}, {"campo": "25 de Mayo", "corral": "C3", "cabezas": 5, "categoria": "TH", "mes_salida": "2026-07", "venta_orig": 10173735.0}, {"campo": "25 de Mayo", "corral": "C3", "cabezas": 11, "categoria": "TH", "mes_salida": "2026-07", "venta_orig": 22382217.0}, {"campo": "25 de Mayo", "corral": "C3", "cabezas": 4, "categoria": "TH", "mes_salida": "2026-07", "venta_orig": 8138988.000000001}, {"campo": "25 de Mayo", "corral": "C3", "cabezas": 7, "categoria": "TH", "mes_salida": "2026-07", "venta_orig": 14243229.000000004}, {"campo": "25 de Mayo", "corral": "C3", "cabezas": 3, "categoria": "TH", "mes_salida": "2026-07", "venta_orig": 6104241.000000001}, {"campo": "25 de Mayo", "corral": "C4", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-06", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "C4", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-06", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "C4", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-07", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "C4", "cabezas": 6, "categoria": "TH", "mes_salida": "2026-07", "venta_orig": 12208482.000000002}, {"campo": "25 de Mayo", "corral": "C4", "cabezas": 3, "categoria": "TH", "mes_salida": "2026-06", "venta_orig": 6104241.000000001}, {"campo": "25 de Mayo", "corral": "C4", "cabezas": 2, "categoria": "TH", "mes_salida": "2026-07", "venta_orig": 4069494.0000000005}, {"campo": "25 de Mayo", "corral": "C4", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-06", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "C4", "cabezas": 14, "categoria": "TH", "mes_salida": "2026-07", "venta_orig": 28486458.000000007}, {"campo": "25 de Mayo", "corral": "C4", "cabezas": 5, "categoria": "TH", "mes_salida": "2026-08", "venta_orig": 10173735.0}, {"campo": "25 de Mayo", "corral": "C4", "cabezas": 5, "categoria": "TH", "mes_salida": "2026-07", "venta_orig": 10173735.0}, {"campo": "25 de Mayo", "corral": "C4", "cabezas": 2, "categoria": "TH", "mes_salida": "2026-08", "venta_orig": 4069494.0000000005}, {"campo": "25 de Mayo", "corral": "C4", "cabezas": 3, "categoria": "TH", "mes_salida": "2026-09", "venta_orig": 6104241.000000001}, {"campo": "25 de Mayo", "corral": "C4", "cabezas": 2, "categoria": "TH", "mes_salida": "2026-08", "venta_orig": 4069494.0000000005}, {"campo": "25 de Mayo", "corral": "C4", "cabezas": 3, "categoria": "TH", "mes_salida": "2026-07", "venta_orig": 6104241.000000001}, {"campo": "25 de Mayo", "corral": "C4", "cabezas": 2, "categoria": "TM", "mes_salida": "2026-10", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "C4", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-09", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C4", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-10", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C4", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-08", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C4", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-09", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C5", "cabezas": 1, "categoria": "TH", "mes_salida": "2027-02", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "C5", "cabezas": 3, "categoria": "TH", "mes_salida": "2027-02", "venta_orig": 6104241.000000001}, {"campo": "25 de Mayo", "corral": "C5", "cabezas": 4, "categoria": "TH", "mes_salida": "2027-01", "venta_orig": 8138988.000000001}, {"campo": "25 de Mayo", "corral": "C5", "cabezas": 24, "categoria": "TH", "mes_salida": "2027-02", "venta_orig": 48833928.00000001}, {"campo": "25 de Mayo", "corral": "C5", "cabezas": 1, "categoria": "TH", "mes_salida": "2027-06", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "C5", "cabezas": 5, "categoria": "TM", "mes_salida": "2027-03", "venta_orig": 11374800.9375}, {"campo": "25 de Mayo", "corral": "C5", "cabezas": 1, "categoria": "TM", "mes_salida": "2027-04", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C5", "cabezas": 2, "categoria": "TM", "mes_salida": "2027-04", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "C5", "cabezas": 37, "categoria": "TM", "mes_salida": "2027-03", "venta_orig": 84173526.9375}, {"campo": "25 de Mayo", "corral": "C5", "cabezas": 1, "categoria": "TM", "mes_salida": "2027-06", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C5", "cabezas": 1, "categoria": "TM", "mes_salida": "2027-02", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C5", "cabezas": 3, "categoria": "TM", "mes_salida": "2027-05", "venta_orig": 6824880.562500001}, {"campo": "25 de Mayo", "corral": "C6", "cabezas": 1, "categoria": "NT", "mes_salida": "2026-10", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C6", "cabezas": 38, "categoria": "TH", "mes_salida": "2027-05", "venta_orig": 77320386.0}, {"campo": "25 de Mayo", "corral": "C6", "cabezas": 27, "categoria": "TM", "mes_salida": "2027-05", "venta_orig": 61423925.06250001}, {"campo": "25 de Mayo", "corral": "C6", "cabezas": 2, "categoria": "VA", "mes_salida": "2026-10", "venta_orig": 4520566.05}, {"campo": "25 de Mayo", "corral": "C7", "cabezas": 54, "categoria": "VA", "mes_salida": "2026-08", "venta_orig": 122055283.35000001}, {"campo": "25 de Mayo", "corral": "C8", "cabezas": 17, "categoria": "TH", "mes_salida": "2027-02", "venta_orig": 34590699.0}, {"campo": "25 de Mayo", "corral": "C8", "cabezas": 1, "categoria": "TH", "mes_salida": "2027-01", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "C8", "cabezas": 3, "categoria": "TH", "mes_salida": "2027-01", "venta_orig": 6104241.000000001}, {"campo": "25 de Mayo", "corral": "C8", "cabezas": 10, "categoria": "TH", "mes_salida": "2027-02", "venta_orig": 20347470.0}, {"campo": "25 de Mayo", "corral": "C8", "cabezas": 2, "categoria": "TH", "mes_salida": "2027-02", "venta_orig": 4069494.0000000005}, {"campo": "25 de Mayo", "corral": "C8", "cabezas": 1, "categoria": "TH", "mes_salida": "2027-01", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "C8", "cabezas": 2, "categoria": "TM", "mes_salida": "2027-03", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "C8", "cabezas": 7, "categoria": "TM", "mes_salida": "2027-03", "venta_orig": 15924721.312500002}, {"campo": "25 de Mayo", "corral": "C8", "cabezas": 9, "categoria": "TM", "mes_salida": "2027-03", "venta_orig": 20474641.6875}, {"campo": "25 de Mayo", "corral": "C8", "cabezas": 1, "categoria": "TM", "mes_salida": "2027-03", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C8", "cabezas": 13, "categoria": "TM", "mes_salida": "2027-03", "venta_orig": 29574482.437500004}, {"campo": "25 de Mayo", "corral": "C8", "cabezas": 2, "categoria": "TM", "mes_salida": "2027-02", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "C8", "cabezas": 2, "categoria": "TM", "mes_salida": "2027-02", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "C8", "cabezas": 1, "categoria": "TM", "mes_salida": "2027-03", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C9", "cabezas": 7, "categoria": "TH", "mes_salida": "2027-02", "venta_orig": 14243229.000000004}, {"campo": "25 de Mayo", "corral": "C9", "cabezas": 8, "categoria": "TH", "mes_salida": "2027-01", "venta_orig": 16277976.000000002}, {"campo": "25 de Mayo", "corral": "C9", "cabezas": 1, "categoria": "TH", "mes_salida": "2027-02", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "C9", "cabezas": 1, "categoria": "TH", "mes_salida": "2027-01", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "C9", "cabezas": 8, "categoria": "TH", "mes_salida": "2027-02", "venta_orig": 16277976.000000002}, {"campo": "25 de Mayo", "corral": "C9", "cabezas": 3, "categoria": "TH", "mes_salida": "2027-01", "venta_orig": 6104241.000000001}, {"campo": "25 de Mayo", "corral": "C9", "cabezas": 1, "categoria": "TM", "mes_salida": "2027-01", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C9", "cabezas": 15, "categoria": "TM", "mes_salida": "2027-03", "venta_orig": 34124402.8125}, {"campo": "25 de Mayo", "corral": "C9", "cabezas": 5, "categoria": "TM", "mes_salida": "2027-03", "venta_orig": 11374800.9375}, {"campo": "25 de Mayo", "corral": "C9", "cabezas": 1, "categoria": "TM", "mes_salida": "2027-04", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C9", "cabezas": 15, "categoria": "TM", "mes_salida": "2027-03", "venta_orig": 34124402.8125}, {"campo": "25 de Mayo", "corral": "C9", "cabezas": 2, "categoria": "TM", "mes_salida": "2027-02", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "C9", "cabezas": 1, "categoria": "TM", "mes_salida": "2027-03", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C9", "cabezas": 1, "categoria": "TM", "mes_salida": "2027-03", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C9", "cabezas": 1, "categoria": "TM", "mes_salida": "2027-02", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C9", "cabezas": 1, "categoria": "TM", "mes_salida": "2027-03", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C10", "cabezas": 11, "categoria": "TH", "mes_salida": "2027-01", "venta_orig": 22382217.0}, {"campo": "25 de Mayo", "corral": "C10", "cabezas": 1, "categoria": "TH", "mes_salida": "2027-02", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "C10", "cabezas": 1, "categoria": "TH", "mes_salida": "2027-01", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "C10", "cabezas": 5, "categoria": "TH", "mes_salida": "2027-01", "venta_orig": 10173735.0}, {"campo": "25 de Mayo", "corral": "C10", "cabezas": 18, "categoria": "TH", "mes_salida": "2027-01", "venta_orig": 36625446.0}, {"campo": "25 de Mayo", "corral": "C10", "cabezas": 2, "categoria": "TM", "mes_salida": "2027-03", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "C10", "cabezas": 1, "categoria": "TM", "mes_salida": "2027-03", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C10", "cabezas": 12, "categoria": "TM", "mes_salida": "2027-03", "venta_orig": 27299522.250000004}, {"campo": "25 de Mayo", "corral": "C10", "cabezas": 4, "categoria": "TM", "mes_salida": "2027-02", "venta_orig": 9099840.75}, {"campo": "25 de Mayo", "corral": "C10", "cabezas": 23, "categoria": "TM", "mes_salida": "2027-02", "venta_orig": 52324084.31250001}, {"campo": "25 de Mayo", "corral": "C11", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-07", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "C11", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-07", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "C11", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-08", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C11", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-09", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C11", "cabezas": 2, "categoria": "TM", "mes_salida": "2026-08", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "C11", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-08", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C11", "cabezas": 3, "categoria": "TM", "mes_salida": "2026-09", "venta_orig": 6824880.562500001}, {"campo": "25 de Mayo", "corral": "C11", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-08", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C11", "cabezas": 5, "categoria": "TM", "mes_salida": "2026-08", "venta_orig": 11374800.9375}, {"campo": "25 de Mayo", "corral": "C11", "cabezas": 11, "categoria": "TM", "mes_salida": "2026-09", "venta_orig": 25024562.062500004}, {"campo": "25 de Mayo", "corral": "C11", "cabezas": 3, "categoria": "TM", "mes_salida": "2026-09", "venta_orig": 6824880.562500001}, {"campo": "25 de Mayo", "corral": "C11", "cabezas": 5, "categoria": "TM", "mes_salida": "2026-09", "venta_orig": 11374800.9375}, {"campo": "25 de Mayo", "corral": "C11", "cabezas": 7, "categoria": "TM", "mes_salida": "2026-09", "venta_orig": 15924721.312500002}, {"campo": "25 de Mayo", "corral": "C11", "cabezas": 7, "categoria": "TM", "mes_salida": "2026-09", "venta_orig": 15924721.312500002}, {"campo": "25 de Mayo", "corral": "C11", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-07", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C11", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-10", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C11", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-09", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C11", "cabezas": 7, "categoria": "TM", "mes_salida": "2026-08", "venta_orig": 15924721.312500002}, {"campo": "25 de Mayo", "corral": "C15", "cabezas": 24, "categoria": "TH", "mes_salida": "2027-02", "venta_orig": 48833928.00000001}, {"campo": "25 de Mayo", "corral": "C15", "cabezas": 1, "categoria": "TH", "mes_salida": "2027-02", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "C15", "cabezas": 1, "categoria": "TH", "mes_salida": "2027-01", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "C15", "cabezas": 2, "categoria": "TH", "mes_salida": "2027-01", "venta_orig": 4069494.0000000005}, {"campo": "25 de Mayo", "corral": "C15", "cabezas": 6, "categoria": "TH", "mes_salida": "2027-01", "venta_orig": 12208482.000000002}, {"campo": "25 de Mayo", "corral": "C15", "cabezas": 8, "categoria": "TH", "mes_salida": "2027-01", "venta_orig": 16277976.000000002}, {"campo": "25 de Mayo", "corral": "C15", "cabezas": 1, "categoria": "TM", "mes_salida": "2027-02", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C15", "cabezas": 18, "categoria": "TM", "mes_salida": "2027-03", "venta_orig": 40949283.375}, {"campo": "25 de Mayo", "corral": "C15", "cabezas": 5, "categoria": "TM", "mes_salida": "2027-02", "venta_orig": 11374800.9375}, {"campo": "25 de Mayo", "corral": "C15", "cabezas": 10, "categoria": "TM", "mes_salida": "2027-02", "venta_orig": 22749601.875}, {"campo": "25 de Mayo", "corral": "C16", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-05", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "C16", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-05", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "C16", "cabezas": 3, "categoria": "TH", "mes_salida": "2026-06", "venta_orig": 6104241.000000001}, {"campo": "25 de Mayo", "corral": "C16", "cabezas": 4, "categoria": "TM", "mes_salida": "2026-07", "venta_orig": 9099840.75}, {"campo": "25 de Mayo", "corral": "C16", "cabezas": 2, "categoria": "TM", "mes_salida": "2026-07", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "C16", "cabezas": 2, "categoria": "TM", "mes_salida": "2026-07", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "C16", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-06", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "C16", "cabezas": 2, "categoria": "TM", "mes_salida": "2026-07", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "C16", "cabezas": 2, "categoria": "TM", "mes_salida": "2026-08", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "C16", "cabezas": 2, "categoria": "TM", "mes_salida": "2026-07", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "C16", "cabezas": 3, "categoria": "TM", "mes_salida": "2026-08", "venta_orig": 6824880.562500001}, {"campo": "25 de Mayo", "corral": "C16", "cabezas": 7, "categoria": "TM", "mes_salida": "2026-07", "venta_orig": 15924721.312500002}, {"campo": "25 de Mayo", "corral": "C16", "cabezas": 3, "categoria": "TM", "mes_salida": "2026-06", "venta_orig": 6824880.562500001}, {"campo": "25 de Mayo", "corral": "C16", "cabezas": 2, "categoria": "VQ", "mes_salida": "2026-05", "venta_orig": 4069494.0000000005}, {"campo": "25 de Mayo", "corral": "B28", "cabezas": 3, "categoria": "TH", "mes_salida": "2026-06", "venta_orig": 6104241.000000001}, {"campo": "25 de Mayo", "corral": "B28", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-06", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B28", "cabezas": 2, "categoria": "TH", "mes_salida": "2026-06", "venta_orig": 4069494.0000000005}, {"campo": "25 de Mayo", "corral": "B28", "cabezas": 2, "categoria": "TH", "mes_salida": "2026-07", "venta_orig": 4069494.0000000005}, {"campo": "25 de Mayo", "corral": "B28", "cabezas": 2, "categoria": "TH", "mes_salida": "2026-06", "venta_orig": 4069494.0000000005}, {"campo": "25 de Mayo", "corral": "B28", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-05", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B28", "cabezas": 10, "categoria": "TH", "mes_salida": "2026-06", "venta_orig": 20347470.0}, {"campo": "25 de Mayo", "corral": "B28", "cabezas": 5, "categoria": "TH", "mes_salida": "2026-06", "venta_orig": 10173735.0}, {"campo": "25 de Mayo", "corral": "B28", "cabezas": 9, "categoria": "TH", "mes_salida": "2026-06", "venta_orig": 18312723.0}, {"campo": "25 de Mayo", "corral": "B28", "cabezas": 4, "categoria": "TH", "mes_salida": "2026-06", "venta_orig": 8138988.000000001}, {"campo": "25 de Mayo", "corral": "B28", "cabezas": 2, "categoria": "TH", "mes_salida": "2026-06", "venta_orig": 4069494.0000000005}, {"campo": "25 de Mayo", "corral": "B28", "cabezas": 7, "categoria": "TH", "mes_salida": "2026-06", "venta_orig": 14243229.000000004}, {"campo": "25 de Mayo", "corral": "B28", "cabezas": 6, "categoria": "TH", "mes_salida": "2026-06", "venta_orig": 12208482.000000002}, {"campo": "25 de Mayo", "corral": "B28", "cabezas": 2, "categoria": "TM", "mes_salida": "2026-08", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "B28", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-08", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B28", "cabezas": 1, "categoria": "VQ", "mes_salida": "2026-05", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B28", "cabezas": 2, "categoria": "VQ", "mes_salida": "2026-06", "venta_orig": 4069494.0000000005}, {"campo": "25 de Mayo", "corral": "B26", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-05", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B26", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-05", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B26", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-05", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B26", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-05", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B26", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-05", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B26", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-05", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B26", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-05", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B26", "cabezas": 2, "categoria": "TM", "mes_salida": "2026-08", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "B26", "cabezas": 7, "categoria": "TM", "mes_salida": "2026-07", "venta_orig": 15924721.312500002}, {"campo": "25 de Mayo", "corral": "B26", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-07", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B26", "cabezas": 5, "categoria": "TM", "mes_salida": "2026-07", "venta_orig": 11374800.9375}, {"campo": "25 de Mayo", "corral": "B26", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-08", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B26", "cabezas": 3, "categoria": "TM", "mes_salida": "2026-07", "venta_orig": 6824880.562500001}, {"campo": "25 de Mayo", "corral": "B26", "cabezas": 2, "categoria": "TM", "mes_salida": "2026-07", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "B26", "cabezas": 3, "categoria": "TM", "mes_salida": "2026-07", "venta_orig": 6824880.562500001}, {"campo": "25 de Mayo", "corral": "B26", "cabezas": 10, "categoria": "TM", "mes_salida": "2026-08", "venta_orig": 22749601.875}, {"campo": "25 de Mayo", "corral": "B26", "cabezas": 5, "categoria": "TM", "mes_salida": "2026-08", "venta_orig": 11374800.9375}, {"campo": "25 de Mayo", "corral": "B26", "cabezas": 2, "categoria": "TM", "mes_salida": "2026-06", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "B26", "cabezas": 5, "categoria": "TM", "mes_salida": "2026-07", "venta_orig": 11374800.9375}, {"campo": "25 de Mayo", "corral": "B26", "cabezas": 2, "categoria": "VQ", "mes_salida": "2026-05", "venta_orig": 4069494.0000000005}, {"campo": "25 de Mayo", "corral": "B26", "cabezas": 1, "categoria": "VQ", "mes_salida": "2026-05", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B25", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-05", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B25", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-05", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B25", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-05", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B25", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-05", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B25", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-05", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B25", "cabezas": 2, "categoria": "TH", "mes_salida": "2026-05", "venta_orig": 4069494.0000000005}, {"campo": "25 de Mayo", "corral": "B25", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-07", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B25", "cabezas": 3, "categoria": "TH", "mes_salida": "2026-05", "venta_orig": 6104241.000000001}, {"campo": "25 de Mayo", "corral": "B25", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-09", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B25", "cabezas": 2, "categoria": "TM", "mes_salida": "2026-08", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "B25", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-08", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B25", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-05", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B25", "cabezas": 5, "categoria": "TM", "mes_salida": "2026-07", "venta_orig": 11374800.9375}, {"campo": "25 de Mayo", "corral": "B25", "cabezas": 3, "categoria": "TM", "mes_salida": "2026-07", "venta_orig": 6824880.562500001}, {"campo": "25 de Mayo", "corral": "B25", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-05", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B25", "cabezas": 4, "categoria": "TM", "mes_salida": "2026-07", "venta_orig": 9099840.75}, {"campo": "25 de Mayo", "corral": "B25", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-07", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B25", "cabezas": 8, "categoria": "TM", "mes_salida": "2026-07", "venta_orig": 18199681.5}, {"campo": "25 de Mayo", "corral": "B25", "cabezas": 4, "categoria": "TM", "mes_salida": "2026-07", "venta_orig": 9099840.75}, {"campo": "25 de Mayo", "corral": "B25", "cabezas": 9, "categoria": "TM", "mes_salida": "2026-07", "venta_orig": 20474641.6875}, {"campo": "25 de Mayo", "corral": "B25", "cabezas": 2, "categoria": "TM", "mes_salida": "2026-08", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "B25", "cabezas": 2, "categoria": "TM", "mes_salida": "2026-07", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "B25", "cabezas": 2, "categoria": "VQ", "mes_salida": "2026-05", "venta_orig": 4069494.0000000005}, {"campo": "25 de Mayo", "corral": "B24", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-06", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B24", "cabezas": 2, "categoria": "TH", "mes_salida": "2026-06", "venta_orig": 4069494.0000000005}, {"campo": "25 de Mayo", "corral": "B24", "cabezas": 3, "categoria": "TH", "mes_salida": "2026-06", "venta_orig": 6104241.000000001}, {"campo": "25 de Mayo", "corral": "B24", "cabezas": 5, "categoria": "TH", "mes_salida": "2026-06", "venta_orig": 10173735.0}, {"campo": "25 de Mayo", "corral": "B24", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-06", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B24", "cabezas": 7, "categoria": "TH", "mes_salida": "2026-06", "venta_orig": 14243229.000000004}, {"campo": "25 de Mayo", "corral": "B24", "cabezas": 3, "categoria": "TH", "mes_salida": "2026-06", "venta_orig": 6104241.000000001}, {"campo": "25 de Mayo", "corral": "B24", "cabezas": 12, "categoria": "TH", "mes_salida": "2026-05", "venta_orig": 24416964.000000004}, {"campo": "25 de Mayo", "corral": "B24", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-05", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B24", "cabezas": 2, "categoria": "TH", "mes_salida": "2026-06", "venta_orig": 4069494.0000000005}, {"campo": "25 de Mayo", "corral": "B24", "cabezas": 3, "categoria": "TH", "mes_salida": "2026-05", "venta_orig": 6104241.000000001}, {"campo": "25 de Mayo", "corral": "B24", "cabezas": 16, "categoria": "TH", "mes_salida": "2026-06", "venta_orig": 32555952.000000004}, {"campo": "25 de Mayo", "corral": "B24", "cabezas": 8, "categoria": "TH", "mes_salida": "2026-06", "venta_orig": 16277976.000000002}, {"campo": "25 de Mayo", "corral": "B24", "cabezas": 8, "categoria": "TH", "mes_salida": "2026-05", "venta_orig": 16277976.000000002}, {"campo": "25 de Mayo", "corral": "B24", "cabezas": 2, "categoria": "TH", "mes_salida": "2026-06", "venta_orig": 4069494.0000000005}, {"campo": "25 de Mayo", "corral": "B24", "cabezas": 2, "categoria": "TH", "mes_salida": "2026-05", "venta_orig": 4069494.0000000005}, {"campo": "25 de Mayo", "corral": "B24", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-07", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B24", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-06", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B24", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-06", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B24", "cabezas": 8, "categoria": "TM", "mes_salida": "2026-07", "venta_orig": 18199681.5}, {"campo": "25 de Mayo", "corral": "B22", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-08", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B22", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-08", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B22", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-08", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B22", "cabezas": 2, "categoria": "TM", "mes_salida": "2026-09", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "B22", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-10", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B22", "cabezas": 2, "categoria": "TM", "mes_salida": "2026-09", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "B22", "cabezas": 5, "categoria": "TM", "mes_salida": "2026-09", "venta_orig": 11374800.9375}, {"campo": "25 de Mayo", "corral": "B22", "cabezas": 2, "categoria": "TM", "mes_salida": "2026-08", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "B22", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-09", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B22", "cabezas": 16, "categoria": "TM", "mes_salida": "2026-09", "venta_orig": 36399363.0}, {"campo": "25 de Mayo", "corral": "B22", "cabezas": 5, "categoria": "TM", "mes_salida": "2026-09", "venta_orig": 11374800.9375}, {"campo": "25 de Mayo", "corral": "B22", "cabezas": 3, "categoria": "TM", "mes_salida": "2026-10", "venta_orig": 6824880.562500001}, {"campo": "25 de Mayo", "corral": "B22", "cabezas": 2, "categoria": "TM", "mes_salida": "2026-09", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "B22", "cabezas": 6, "categoria": "TM", "mes_salida": "2026-10", "venta_orig": 13649761.125000002}, {"campo": "25 de Mayo", "corral": "B22", "cabezas": 9, "categoria": "TM", "mes_salida": "2026-09", "venta_orig": 20474641.6875}, {"campo": "25 de Mayo", "corral": "B22", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-10", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B19", "cabezas": 2, "categoria": "TM", "mes_salida": "2026-06", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "B19", "cabezas": 6, "categoria": "TM", "mes_salida": "2026-05", "venta_orig": 13649761.125000002}, {"campo": "25 de Mayo", "corral": "B19", "cabezas": 5, "categoria": "TM", "mes_salida": "2026-06", "venta_orig": 11374800.9375}, {"campo": "25 de Mayo", "corral": "B19", "cabezas": 5, "categoria": "TM", "mes_salida": "2026-06", "venta_orig": 11374800.9375}, {"campo": "25 de Mayo", "corral": "B19", "cabezas": 3, "categoria": "TM", "mes_salida": "2026-06", "venta_orig": 6824880.562500001}, {"campo": "25 de Mayo", "corral": "B19", "cabezas": 3, "categoria": "TM", "mes_salida": "2026-05", "venta_orig": 6824880.562500001}, {"campo": "25 de Mayo", "corral": "B19", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-07", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B19", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-07", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B19", "cabezas": 4, "categoria": "TM", "mes_salida": "2026-06", "venta_orig": 9099840.75}, {"campo": "25 de Mayo", "corral": "B19", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-07", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B19", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-08", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B19", "cabezas": 2, "categoria": "TM", "mes_salida": "2026-07", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "B19", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-07", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B19", "cabezas": 2, "categoria": "TM", "mes_salida": "2026-07", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "B17", "cabezas": 1, "categoria": "TH", "mes_salida": "2027-03", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B17", "cabezas": 2, "categoria": "TH", "mes_salida": "2027-03", "venta_orig": 4069494.0000000005}, {"campo": "25 de Mayo", "corral": "B17", "cabezas": 7, "categoria": "TH", "mes_salida": "2027-03", "venta_orig": 14243229.000000004}, {"campo": "25 de Mayo", "corral": "B17", "cabezas": 4, "categoria": "TH", "mes_salida": "2027-03", "venta_orig": 8138988.000000001}, {"campo": "25 de Mayo", "corral": "B17", "cabezas": 3, "categoria": "TH", "mes_salida": "2027-03", "venta_orig": 6104241.000000001}, {"campo": "25 de Mayo", "corral": "B17", "cabezas": 16, "categoria": "TH", "mes_salida": "2027-03", "venta_orig": 32555952.000000004}, {"campo": "25 de Mayo", "corral": "B17", "cabezas": 1, "categoria": "TH", "mes_salida": "2027-04", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B17", "cabezas": 15, "categoria": "TH", "mes_salida": "2027-02", "venta_orig": 30521205.000000004}, {"campo": "25 de Mayo", "corral": "B17", "cabezas": 3, "categoria": "TH", "mes_salida": "2027-02", "venta_orig": 6104241.000000001}, {"campo": "25 de Mayo", "corral": "B17", "cabezas": 3, "categoria": "TH", "mes_salida": "2027-03", "venta_orig": 6104241.000000001}, {"campo": "25 de Mayo", "corral": "B17", "cabezas": 2, "categoria": "TH", "mes_salida": "2027-03", "venta_orig": 4069494.0000000005}, {"campo": "25 de Mayo", "corral": "B17", "cabezas": 1, "categoria": "TM", "mes_salida": "2027-05", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B17", "cabezas": 12, "categoria": "TM", "mes_salida": "2027-04", "venta_orig": 27299522.250000004}, {"campo": "25 de Mayo", "corral": "B17", "cabezas": 1, "categoria": "TM", "mes_salida": "2027-05", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B17", "cabezas": 4, "categoria": "TM", "mes_salida": "2027-04", "venta_orig": 9099840.75}, {"campo": "25 de Mayo", "corral": "B17", "cabezas": 1, "categoria": "TM", "mes_salida": "2027-04", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B17", "cabezas": 7, "categoria": "TM", "mes_salida": "2027-04", "venta_orig": 15924721.312500002}, {"campo": "25 de Mayo", "corral": "B17", "cabezas": 2, "categoria": "TM", "mes_salida": "2027-03", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "B17", "cabezas": 2, "categoria": "TM", "mes_salida": "2027-05", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "B17", "cabezas": 11, "categoria": "TM", "mes_salida": "2027-04", "venta_orig": 25024562.062500004}, {"campo": "25 de Mayo", "corral": "B16", "cabezas": 4, "categoria": "TH", "mes_salida": "2027-04", "venta_orig": 8138988.000000001}, {"campo": "25 de Mayo", "corral": "B16", "cabezas": 14, "categoria": "TH", "mes_salida": "2027-03", "venta_orig": 28486458.000000007}, {"campo": "25 de Mayo", "corral": "B16", "cabezas": 1, "categoria": "TH", "mes_salida": "2027-04", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B16", "cabezas": 4, "categoria": "TH", "mes_salida": "2027-03", "venta_orig": 8138988.000000001}, {"campo": "25 de Mayo", "corral": "B16", "cabezas": 27, "categoria": "TH", "mes_salida": "2027-03", "venta_orig": 54938169.00000001}, {"campo": "25 de Mayo", "corral": "B16", "cabezas": 1, "categoria": "TH", "mes_salida": "2027-03", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B16", "cabezas": 4, "categoria": "TH", "mes_salida": "2027-04", "venta_orig": 8138988.000000001}, {"campo": "25 de Mayo", "corral": "B16", "cabezas": 1, "categoria": "TH", "mes_salida": "2027-03", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B16", "cabezas": 1, "categoria": "TH", "mes_salida": "2027-03", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B16", "cabezas": 1, "categoria": "TM", "mes_salida": "2027-05", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B16", "cabezas": 7, "categoria": "TM", "mes_salida": "2027-05", "venta_orig": 15924721.312500002}, {"campo": "25 de Mayo", "corral": "B16", "cabezas": 4, "categoria": "TM", "mes_salida": "2027-05", "venta_orig": 9099840.75}, {"campo": "25 de Mayo", "corral": "B16", "cabezas": 2, "categoria": "TM", "mes_salida": "2027-04", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "B16", "cabezas": 9, "categoria": "TM", "mes_salida": "2027-05", "venta_orig": 20474641.6875}, {"campo": "25 de Mayo", "corral": "B16", "cabezas": 1, "categoria": "TM", "mes_salida": "2027-04", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B16", "cabezas": 1, "categoria": "TM", "mes_salida": "2027-04", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B16", "cabezas": 5, "categoria": "TM", "mes_salida": "2027-05", "venta_orig": 11374800.9375}, {"campo": "25 de Mayo", "corral": "B15", "cabezas": 1, "categoria": "TH", "mes_salida": "2027-03", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B15", "cabezas": 12, "categoria": "TH", "mes_salida": "2027-03", "venta_orig": 24416964.000000004}, {"campo": "25 de Mayo", "corral": "B15", "cabezas": 28, "categoria": "TH", "mes_salida": "2027-04", "venta_orig": 56972916.000000015}, {"campo": "25 de Mayo", "corral": "B15", "cabezas": 6, "categoria": "TH", "mes_salida": "2027-03", "venta_orig": 12208482.000000002}, {"campo": "25 de Mayo", "corral": "B15", "cabezas": 1, "categoria": "TH", "mes_salida": "2027-03", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B15", "cabezas": 1, "categoria": "TH", "mes_salida": "2027-03", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B15", "cabezas": 2, "categoria": "TH", "mes_salida": "2027-03", "venta_orig": 4069494.0000000005}, {"campo": "25 de Mayo", "corral": "B15", "cabezas": 2, "categoria": "TH", "mes_salida": "2027-03", "venta_orig": 4069494.0000000005}, {"campo": "25 de Mayo", "corral": "B15", "cabezas": 3, "categoria": "TH", "mes_salida": "2027-03", "venta_orig": 6104241.000000001}, {"campo": "25 de Mayo", "corral": "B15", "cabezas": 8, "categoria": "TM", "mes_salida": "2027-05", "venta_orig": 18199681.5}, {"campo": "25 de Mayo", "corral": "B15", "cabezas": 2, "categoria": "TM", "mes_salida": "2027-04", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "B15", "cabezas": 4, "categoria": "TM", "mes_salida": "2027-05", "venta_orig": 9099840.75}, {"campo": "25 de Mayo", "corral": "B15", "cabezas": 4, "categoria": "TM", "mes_salida": "2027-05", "venta_orig": 9099840.75}, {"campo": "25 de Mayo", "corral": "B15", "cabezas": 1, "categoria": "TM", "mes_salida": "2027-04", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B15", "cabezas": 10, "categoria": "TM", "mes_salida": "2027-05", "venta_orig": 22749601.875}, {"campo": "25 de Mayo", "corral": "B15", "cabezas": 1, "categoria": "TM", "mes_salida": "2027-05", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B15", "cabezas": 1, "categoria": "TM", "mes_salida": "2027-04", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B3", "cabezas": 1, "categoria": "NT", "mes_salida": "2026-05", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B3", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-05", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B3", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-07", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B3", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-08", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B3", "cabezas": 7, "categoria": "TH", "mes_salida": "2026-09", "venta_orig": 14243229.000000004}, {"campo": "25 de Mayo", "corral": "B3", "cabezas": 3, "categoria": "TH", "mes_salida": "2026-07", "venta_orig": 6104241.000000001}, {"campo": "25 de Mayo", "corral": "B3", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-11", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B3", "cabezas": 3, "categoria": "TH", "mes_salida": "2026-08", "venta_orig": 6104241.000000001}, {"campo": "25 de Mayo", "corral": "B3", "cabezas": 2, "categoria": "TM", "mes_salida": "2026-05", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "B3", "cabezas": 2, "categoria": "TM", "mes_salida": "2026-05", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "B3", "cabezas": 2, "categoria": "TM", "mes_salida": "2026-07", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "B3", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-07", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B3", "cabezas": 2, "categoria": "TM", "mes_salida": "2026-08", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "B3", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-08", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B3", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-09", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B3", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-11", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B4", "cabezas": 48, "categoria": "TH", "mes_salida": "2026-12", "venta_orig": 97667856.00000001}, {"campo": "25 de Mayo", "corral": "B4", "cabezas": 18, "categoria": "TM", "mes_salida": "2027-01", "venta_orig": 40949283.375}, {"campo": "25 de Mayo", "corral": "B5", "cabezas": 3, "categoria": "TH", "mes_salida": "2026-10", "venta_orig": 6104241.000000001}, {"campo": "25 de Mayo", "corral": "B5", "cabezas": 2, "categoria": "TH", "mes_salida": "2026-11", "venta_orig": 4069494.0000000005}, {"campo": "25 de Mayo", "corral": "B5", "cabezas": 8, "categoria": "TH", "mes_salida": "2026-11", "venta_orig": 16277976.000000002}, {"campo": "25 de Mayo", "corral": "B5", "cabezas": 15, "categoria": "TH", "mes_salida": "2026-11", "venta_orig": 30521205.000000004}, {"campo": "25 de Mayo", "corral": "B5", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-11", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B5", "cabezas": 2, "categoria": "TM", "mes_salida": "2026-10", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "B5", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-10", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B5", "cabezas": 1, "categoria": "TM", "mes_salida": "2027-03", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B5", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-08", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B5", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-10", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B5", "cabezas": 28, "categoria": "TM", "mes_salida": "2027-01", "venta_orig": 63698885.25000001}, {"campo": "25 de Mayo", "corral": "B5", "cabezas": 2, "categoria": "TM", "mes_salida": "2026-12", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "B5", "cabezas": 13, "categoria": "TM", "mes_salida": "2027-01", "venta_orig": 29574482.437500004}, {"campo": "25 de Mayo", "corral": "B6", "cabezas": 38, "categoria": "TH", "mes_salida": "2026-12", "venta_orig": 77320386.0}, {"campo": "25 de Mayo", "corral": "B6", "cabezas": 31, "categoria": "TM", "mes_salida": "2027-01", "venta_orig": 70523765.8125}, {"campo": "25 de Mayo", "corral": "B7", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-07", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B7", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-08", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B7", "cabezas": 2, "categoria": "TH", "mes_salida": "2026-07", "venta_orig": 4069494.0000000005}, {"campo": "25 de Mayo", "corral": "B7", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-07", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B7", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-07", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B7", "cabezas": 2, "categoria": "TH", "mes_salida": "2026-08", "venta_orig": 4069494.0000000005}, {"campo": "25 de Mayo", "corral": "B7", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-07", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B7", "cabezas": 11, "categoria": "TH", "mes_salida": "2026-07", "venta_orig": 22382217.0}, {"campo": "25 de Mayo", "corral": "B7", "cabezas": 5, "categoria": "TH", "mes_salida": "2026-07", "venta_orig": 10173735.0}, {"campo": "25 de Mayo", "corral": "B7", "cabezas": 4, "categoria": "TH", "mes_salida": "2026-07", "venta_orig": 8138988.000000001}, {"campo": "25 de Mayo", "corral": "B7", "cabezas": 6, "categoria": "TH", "mes_salida": "2026-07", "venta_orig": 12208482.000000002}, {"campo": "25 de Mayo", "corral": "B7", "cabezas": 6, "categoria": "TH", "mes_salida": "2026-08", "venta_orig": 12208482.000000002}, {"campo": "25 de Mayo", "corral": "B7", "cabezas": 2, "categoria": "TH", "mes_salida": "2026-07", "venta_orig": 4069494.0000000005}, {"campo": "25 de Mayo", "corral": "B7", "cabezas": 6, "categoria": "TH", "mes_salida": "2026-07", "venta_orig": 12208482.000000002}, {"campo": "25 de Mayo", "corral": "B7", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-09", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B7", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-09", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B7", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-09", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B7", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-09", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B7", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-08", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B7", "cabezas": 2, "categoria": "TM", "mes_salida": "2026-09", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "B9", "cabezas": 4, "categoria": "TH", "mes_salida": "2027-03", "venta_orig": 8138988.000000001}, {"campo": "25 de Mayo", "corral": "B9", "cabezas": 1, "categoria": "TH", "mes_salida": "2027-03", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B9", "cabezas": 30, "categoria": "TH", "mes_salida": "2027-03", "venta_orig": 61042410.00000001}, {"campo": "25 de Mayo", "corral": "B9", "cabezas": 1, "categoria": "TH", "mes_salida": "2027-03", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B9", "cabezas": 2, "categoria": "TH", "mes_salida": "2027-01", "venta_orig": 4069494.0000000005}, {"campo": "25 de Mayo", "corral": "B9", "cabezas": 1, "categoria": "TH", "mes_salida": "2027-04", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B9", "cabezas": 6, "categoria": "TH", "mes_salida": "2026-12", "venta_orig": 12208482.000000002}, {"campo": "25 de Mayo", "corral": "B9", "cabezas": 1, "categoria": "TM", "mes_salida": "2027-01", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B9", "cabezas": 2, "categoria": "TM", "mes_salida": "2027-02", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "B9", "cabezas": 20, "categoria": "TM", "mes_salida": "2027-03", "venta_orig": 45499203.75}, {"campo": "25 de Mayo", "corral": "B9", "cabezas": 9, "categoria": "TM", "mes_salida": "2027-03", "venta_orig": 20474641.6875}, {"campo": "25 de Mayo", "corral": "B9", "cabezas": 3, "categoria": "TM", "mes_salida": "2027-04", "venta_orig": 6824880.562500001}, {"campo": "25 de Mayo", "corral": "B9", "cabezas": 7, "categoria": "TM", "mes_salida": "2027-05", "venta_orig": 15924721.312500002}, {"campo": "25 de Mayo", "corral": "B9", "cabezas": 1, "categoria": "TM", "mes_salida": "2027-06", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B9", "cabezas": 1, "categoria": "TM", "mes_salida": "2027-02", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B9", "cabezas": 1, "categoria": "TM", "mes_salida": "2027-01", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B9", "cabezas": 1, "categoria": "TM", "mes_salida": "2027-03", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B9", "cabezas": 10, "categoria": "TM", "mes_salida": "2027-01", "venta_orig": 22749601.875}, {"campo": "25 de Mayo", "corral": "B10", "cabezas": 1, "categoria": "TH", "mes_salida": "2027-03", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B10", "cabezas": 8, "categoria": "TH", "mes_salida": "2027-02", "venta_orig": 16277976.000000002}, {"campo": "25 de Mayo", "corral": "B10", "cabezas": 16, "categoria": "TH", "mes_salida": "2027-02", "venta_orig": 32555952.000000004}, {"campo": "25 de Mayo", "corral": "B10", "cabezas": 1, "categoria": "TH", "mes_salida": "2027-02", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B10", "cabezas": 1, "categoria": "TH", "mes_salida": "2027-01", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B10", "cabezas": 10, "categoria": "TH", "mes_salida": "2027-02", "venta_orig": 20347470.0}, {"campo": "25 de Mayo", "corral": "B10", "cabezas": 1, "categoria": "TH", "mes_salida": "2027-02", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B10", "cabezas": 1, "categoria": "TM", "mes_salida": "2027-02", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B10", "cabezas": 17, "categoria": "TM", "mes_salida": "2027-03", "venta_orig": 38674323.1875}, {"campo": "25 de Mayo", "corral": "B10", "cabezas": 12, "categoria": "TM", "mes_salida": "2027-03", "venta_orig": 27299522.250000004}, {"campo": "25 de Mayo", "corral": "B10", "cabezas": 4, "categoria": "TM", "mes_salida": "2027-03", "venta_orig": 9099840.75}, {"campo": "25 de Mayo", "corral": "B10", "cabezas": 1, "categoria": "TM", "mes_salida": "2027-04", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B10", "cabezas": 3, "categoria": "TM", "mes_salida": "2027-04", "venta_orig": 6824880.562500001}, {"campo": "25 de Mayo", "corral": "B10", "cabezas": 1, "categoria": "TM", "mes_salida": "2027-03", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B10", "cabezas": 1, "categoria": "TM", "mes_salida": "2027-03", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B10", "cabezas": 2, "categoria": "TM", "mes_salida": "2027-04", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "B11", "cabezas": 11, "categoria": "TH", "mes_salida": "2027-01", "venta_orig": 22382217.0}, {"campo": "25 de Mayo", "corral": "B11", "cabezas": 12, "categoria": "TH", "mes_salida": "2027-02", "venta_orig": 24416964.000000004}, {"campo": "25 de Mayo", "corral": "B11", "cabezas": 10, "categoria": "TH", "mes_salida": "2027-02", "venta_orig": 20347470.0}, {"campo": "25 de Mayo", "corral": "B11", "cabezas": 1, "categoria": "TH", "mes_salida": "2027-01", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B11", "cabezas": 19, "categoria": "TM", "mes_salida": "2027-03", "venta_orig": 43224243.5625}, {"campo": "25 de Mayo", "corral": "B11", "cabezas": 8, "categoria": "TM", "mes_salida": "2027-03", "venta_orig": 18199681.5}, {"campo": "25 de Mayo", "corral": "B11", "cabezas": 1, "categoria": "TM", "mes_salida": "2027-03", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B11", "cabezas": 1, "categoria": "TM", "mes_salida": "2027-03", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B11", "cabezas": 17, "categoria": "TM", "mes_salida": "2027-03", "venta_orig": 38674323.1875}, {"campo": "25 de Mayo", "corral": "B12", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-08", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B12", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-08", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B12", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-08", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B12", "cabezas": 2, "categoria": "TH", "mes_salida": "2026-07", "venta_orig": 4069494.0000000005}, {"campo": "25 de Mayo", "corral": "B12", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-10", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B12", "cabezas": 20, "categoria": "TH", "mes_salida": "2026-11", "venta_orig": 40694940.0}, {"campo": "25 de Mayo", "corral": "B12", "cabezas": 3, "categoria": "TH", "mes_salida": "2026-10", "venta_orig": 6104241.000000001}, {"campo": "25 de Mayo", "corral": "B12", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-10", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B12", "cabezas": 5, "categoria": "TH", "mes_salida": "2026-09", "venta_orig": 10173735.0}, {"campo": "25 de Mayo", "corral": "B12", "cabezas": 5, "categoria": "TH", "mes_salida": "2026-10", "venta_orig": 10173735.0}, {"campo": "25 de Mayo", "corral": "B12", "cabezas": 3, "categoria": "TH", "mes_salida": "2026-09", "venta_orig": 6104241.000000001}, {"campo": "25 de Mayo", "corral": "B12", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-09", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B12", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-12", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B12", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-07", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B12", "cabezas": 2, "categoria": "TM", "mes_salida": "2027-01", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "B12", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-11", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B12", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-11", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B12", "cabezas": 4, "categoria": "TM", "mes_salida": "2026-12", "venta_orig": 9099840.75}, {"campo": "25 de Mayo", "corral": "B12", "cabezas": 3, "categoria": "TM", "mes_salida": "2026-11", "venta_orig": 6824880.562500001}, {"campo": "25 de Mayo", "corral": "B12", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-10", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B13", "cabezas": 1, "categoria": "NT", "mes_salida": "2026-05", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B13", "cabezas": 1, "categoria": "NT", "mes_salida": "2026-05", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B13", "cabezas": 1, "categoria": "NT", "mes_salida": "2026-05", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B13", "cabezas": 2, "categoria": "TH", "mes_salida": "2026-09", "venta_orig": 4069494.0000000005}, {"campo": "25 de Mayo", "corral": "B13", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-08", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B13", "cabezas": 2, "categoria": "TH", "mes_salida": "2026-09", "venta_orig": 4069494.0000000005}, {"campo": "25 de Mayo", "corral": "B13", "cabezas": 9, "categoria": "TH", "mes_salida": "2026-09", "venta_orig": 18312723.0}, {"campo": "25 de Mayo", "corral": "B13", "cabezas": 2, "categoria": "TH", "mes_salida": "2026-09", "venta_orig": 4069494.0000000005}, {"campo": "25 de Mayo", "corral": "B13", "cabezas": 2, "categoria": "TH", "mes_salida": "2026-09", "venta_orig": 4069494.0000000005}, {"campo": "25 de Mayo", "corral": "B13", "cabezas": 2, "categoria": "TH", "mes_salida": "2026-09", "venta_orig": 4069494.0000000005}, {"campo": "25 de Mayo", "corral": "B13", "cabezas": 4, "categoria": "TH", "mes_salida": "2026-09", "venta_orig": 8138988.000000001}, {"campo": "25 de Mayo", "corral": "B13", "cabezas": 3, "categoria": "TH", "mes_salida": "2026-09", "venta_orig": 6104241.000000001}, {"campo": "25 de Mayo", "corral": "B13", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-05", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B13", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-09", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B13", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-05", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B13", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-05", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B13", "cabezas": 11, "categoria": "TM", "mes_salida": "2026-11", "venta_orig": 25024562.062500004}, {"campo": "25 de Mayo", "corral": "B13", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-10", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B13", "cabezas": 4, "categoria": "TM", "mes_salida": "2026-08", "venta_orig": 9099840.75}, {"campo": "25 de Mayo", "corral": "B13", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-05", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B14", "cabezas": 1, "categoria": "NT", "mes_salida": "2026-05", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B14", "cabezas": 1, "categoria": "NT", "mes_salida": "2026-05", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B14", "cabezas": 1, "categoria": "NT", "mes_salida": "2026-05", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B14", "cabezas": 1, "categoria": "NT", "mes_salida": "2026-05", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B14", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-08", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B14", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-05", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B14", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-05", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B14", "cabezas": 2, "categoria": "TH", "mes_salida": "2026-06", "venta_orig": 4069494.0000000005}, {"campo": "25 de Mayo", "corral": "B14", "cabezas": 1, "categoria": "TH", "mes_salida": "2026-05", "venta_orig": 2034747.0000000002}, {"campo": "25 de Mayo", "corral": "B14", "cabezas": 10, "categoria": "TH", "mes_salida": "2026-10", "venta_orig": 20347470.0}, {"campo": "25 de Mayo", "corral": "B14", "cabezas": 2, "categoria": "TH", "mes_salida": "2026-08", "venta_orig": 4069494.0000000005}, {"campo": "25 de Mayo", "corral": "B14", "cabezas": 3, "categoria": "TH", "mes_salida": "2026-08", "venta_orig": 6104241.000000001}, {"campo": "25 de Mayo", "corral": "B14", "cabezas": 5, "categoria": "TH", "mes_salida": "2026-09", "venta_orig": 10173735.0}, {"campo": "25 de Mayo", "corral": "B14", "cabezas": 4, "categoria": "TH", "mes_salida": "2026-09", "venta_orig": 8138988.000000001}, {"campo": "25 de Mayo", "corral": "B14", "cabezas": 3, "categoria": "TH", "mes_salida": "2026-10", "venta_orig": 6104241.000000001}, {"campo": "25 de Mayo", "corral": "B14", "cabezas": 2, "categoria": "TH", "mes_salida": "2026-10", "venta_orig": 4069494.0000000005}, {"campo": "25 de Mayo", "corral": "B14", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-08", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B14", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-05", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B14", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-09", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B14", "cabezas": 2, "categoria": "TM", "mes_salida": "2026-09", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "B14", "cabezas": 2, "categoria": "TM", "mes_salida": "2026-10", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "B14", "cabezas": 2, "categoria": "TM", "mes_salida": "2026-10", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "B14", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-10", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B14", "cabezas": 2, "categoria": "TM", "mes_salida": "2026-10", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "B14", "cabezas": 1, "categoria": "TM", "mes_salida": "2026-10", "venta_orig": 2274960.1875}, {"campo": "25 de Mayo", "corral": "B14", "cabezas": 2, "categoria": "TM", "mes_salida": "2026-11", "venta_orig": 4549920.375}, {"campo": "25 de Mayo", "corral": "B14", "cabezas": 3, "categoria": "TM", "mes_salida": "2026-11", "venta_orig": 6824880.562500001}, {"campo": "Winifreda", "corral": "WIN-1", "cabezas": 27, "categoria": "TH", "mes_salida": "2027-07", "venta_orig": 99887580.0}, {"campo": "Winifreda", "corral": "WIN-2", "cabezas": 26, "categoria": "TM", "mes_salida": "2027-07", "venta_orig": 107543572.5}, {"campo": "Winifreda", "corral": "WIN-4", "cabezas": 100, "categoria": "VA", "mes_salida": "2026-10", "venta_orig": 410960550.0}, {"campo": "Winifreda", "corral": "WIN-5", "cabezas": 84, "categoria": "NT", "mes_salida": "2027-10", "venta_orig": 347448465.0}, {"campo": "Winifreda", "corral": "WIN-6", "cabezas": 83, "categoria": "NT", "mes_salida": "2027-11", "venta_orig": 343312173.75}, {"campo": "Winifreda", "corral": "WIN-7", "cabezas": 83, "categoria": "NT", "mes_salida": "2027-12", "venta_orig": 343312173.75}, {"campo": "Winifreda", "corral": "WIN-8", "cabezas": 443, "categoria": "NT", "mes_salida": "2028-03", "venta_orig": 1832377023.75}, {"campo": "Winifreda", "corral": "WIN-9", "cabezas": 443, "categoria": "NT", "mes_salida": "2028-04", "venta_orig": 1832377023.75}, {"campo": "Winifreda", "corral": "WIN-10", "cabezas": 442, "categoria": "NT", "mes_salida": "2028-05", "venta_orig": 1828240732.5}], "apertura_gdp": {"global": {"gdp_global": 0.834, "recria_n": 2722, "recria_gdp": 0.5848814606440473, "recria_dias": 276.3229243203527, "recria_kg_ganados": 151.87417340191035, "term_n": 3953, "term_gdp": 1.0110259780452997, "term_dias": 151.51834050088542, "term_kg_ganados": 148.6637996458386}, "gdp_teoricos": {"recria": 0.7, "terminacion": 1.1}, "por_categoria": [{"categoria": "NT", "n_total": 1879, "recria_n": 1843, "recria_gdp": 0.5589509612172128, "recria_dias": 278.8041237113402, "term_n": 1878, "term_gdp": 0.9940253963823406, "term_dias": 165.36528221512248}, {"categoria": "VQ", "n_total": 983, "recria_n": 849, "recria_gdp": 0.6291190367289422, "recria_dias": 277.9658421672556, "term_n": 981, "term_gdp": 0.9801436418999321, "term_dias": 154.01732925586137}, {"categoria": "VA", "n_total": 1096, "recria_n": 29, "recria_gdp": 0.952414400991351, "recria_dias": 54.310344827586206, "term_n": 1094, "term_gdp": 1.0679022706610606, "term_dias": 125.5073126142596}]}};
+// ============ TABS - LO PRIMERO DE TODO ============
+(function(){
+  function activarTab(btn) {
+    var allBtns = document.querySelectorAll('.tab-btn');
+    var allPanels = document.querySelectorAll('.panel');
+    for (var j = 0; j < allBtns.length; j++) allBtns[j].classList.remove('active');
+    for (var j = 0; j < allPanels.length; j++) allPanels[j].classList.remove('active');
+    btn.classList.add('active');
+    var tab = btn.getAttribute('data-tab');
+    var panel = document.querySelector('[data-panel="' + tab + '"]');
+    if (panel) panel.classList.add('active');
+    window.scrollTo(0, 0);
+  }
+  var btns = document.querySelectorAll('.tab-btn');
+  for (var i = 0; i < btns.length; i++) {
+    (function(btn){
+      btn.addEventListener('click', function(e){ e.preventDefault(); activarTab(btn); }, false);
+      btn.addEventListener('touchend', function(e){ e.preventDefault(); activarTab(btn); }, false);
+    })(btns[i]);
+  }
+})();
+
+// ============ HELPERS ============
+function fmt(n, dec){
+  if (dec === undefined) dec = 2;
+  if (n === null || n === undefined || isNaN(n)) return '-';
+  return Number(n).toLocaleString('es-AR', {minimumFractionDigits:dec, maximumFractionDigits:dec});
+}
+function fmtInt(n){
+  if (n === null || n === undefined || isNaN(n)) return '-';
+  return Number(n).toLocaleString('es-AR');
+}
+function fmtMon(n){
+  if (n === null || n === undefined || isNaN(n)) return '-';
+  return '$' + Math.round(n/1e6).toLocaleString('es-AR') + 'M';
+}
+function gdpClass(g){
+  if (g === null || g === undefined || isNaN(g)) return '';
+  if (g < 0.75) return 'gdp-bad';
+  if (g < 0.95) return 'gdp-ok';
+  return 'gdp-good';
+}
+function safe(name, fn){
+  try { fn(); } catch(e) { console.error('Error en ' + name + ':', e.message); }
+}
+function setText(id, txt){
+  var el = document.getElementById(id);
+  if (el) el.textContent = txt;
+}
+
+// ============ PRECIOS EDITABLES ============
+var PRECIOS_ORIG = {};
+var PRECIOS = {};
+safe('init-precios', function(){
+  var cats = Object.keys(DATOS.supuestos.categorias);
+  for (var i = 0; i < cats.length; i++){
+    var c = cats[i];
+    PRECIOS_ORIG[c] = DATOS.supuestos.categorias[c].precio;
+    PRECIOS[c] = DATOS.supuestos.categorias[c].precio;
+  }
+});
+
+function calcularVenta(lote){
+  var cat = DATOS.supuestos.categorias[lote.categoria];
+  if (!cat) return lote.venta_orig || 0;
+  return cat.peso_obj * cat.desbaste * (PRECIOS[lote.categoria] || cat.precio) * cat.iva * lote.cabezas;
+}
+
+var chartProy = null;
+function renderPrecios(){
+  var cont = document.getElementById('precios-grid');
+  if (!cont) return;
+  cont.innerHTML = '';
+  var cats = Object.keys(DATOS.supuestos.categorias);
+  for (var i = 0; i < cats.length; i++){
+    var cat = cats[i];
+    var info = DATOS.supuestos.categorias[cat];
+    var nombreCorto = cat;
+    if (info.nombre && info.nombre.indexOf('(') !== -1){
+      nombreCorto = info.nombre.split('(')[1].replace(')','');
+    }
+    var div = document.createElement('div');
+    div.className = 'precio-input';
+    div.innerHTML = '<div class="label-cat">' + cat + ' - ' + nombreCorto + '</div>' +
+      '<input type="number" step="50" value="' + PRECIOS[cat] + '" data-cat="' + cat + '">' +
+      '<div class="unit-cat">$/kg - peso obj ' + info.peso_obj + ' kg</div>';
+    cont.appendChild(div);
+  }
+  var inputs = document.querySelectorAll('.precio-input input');
+  for (var i = 0; i < inputs.length; i++){
+    inputs[i].oninput = function(e){
+      PRECIOS[e.target.getAttribute('data-cat')] = parseFloat(e.target.value) || 0;
+      renderProyeccion();
+    };
+  }
+}
+
+function renderProyeccion(){
+  var porMes = {};
+  if (!DATOS.lotes_proy) return;
+  for (var i = 0; i < DATOS.lotes_proy.length; i++){
+    var l = DATOS.lotes_proy[i];
+    if (!l.mes_salida) continue;
+    if (!porMes[l.mes_salida]) porMes[l.mes_salida] = {cab_25:0, venta_25:0, cab_w:0, venta_w:0};
+    var v = calcularVenta(l);
+    if (l.campo === '25 de Mayo'){
+      porMes[l.mes_salida].cab_25 += l.cabezas;
+      porMes[l.mes_salida].venta_25 += v;
+    } else {
+      porMes[l.mes_salida].cab_w += l.cabezas;
+      porMes[l.mes_salida].venta_w += v;
+    }
+  }
+  var meses = Object.keys(porMes).sort();
+
+  var tot25=0, totW=0, cab25=0, cabW=0;
+  for (var i = 0; i < DATOS.lotes_proy.length; i++){
+    var l = DATOS.lotes_proy[i];
+    var v = calcularVenta(l);
+    if (l.campo === '25 de Mayo'){ tot25 += v; cab25 += l.cabezas; }
+    else { totW += v; cabW += l.cabezas; }
+  }
+  setText('p-tot-25', fmtInt(Math.round(tot25/1e6)));
+  setText('p-cab-25', fmtInt(cab25) + ' cabezas');
+  setText('p-tot-wini', fmtInt(Math.round(totW/1e6)));
+  setText('p-cab-wini', fmtInt(cabW) + ' cabezas');
+  setText('p-tot', fmtInt(Math.round((tot25+totW)/1e6)));
+  setText('p-cab-tot', fmtInt(cab25+cabW) + ' cabezas');
+
+  var tbody = document.getElementById('tbl-proy');
+  if (tbody){
+    tbody.innerHTML = '';
+    for (var i = 0; i < meses.length; i++){
+      var m = meses[i];
+      var x = porMes[m];
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td><strong>' + m + '</strong></td>' +
+        '<td class="num-cell">' + fmtInt(x.cab_25) + '</td>' +
+        '<td class="num-cell">' + fmtMon(x.venta_25) + '</td>' +
+        '<td class="num-cell">' + fmtInt(x.cab_w) + '</td>' +
+        '<td class="num-cell">' + fmtMon(x.venta_w) + '</td>' +
+        '<td class="num-cell"><strong>' + fmtInt(x.cab_25 + x.cab_w) + '</strong></td>' +
+        '<td class="num-cell"><strong>' + fmtMon(x.venta_25 + x.venta_w) + '</strong></td>';
+      tbody.appendChild(tr);
+    }
+  }
+
+  try {
+    if (chartProy) chartProy.destroy();
+    var ctx = document.getElementById('chart-proy');
+    if (ctx && typeof Chart !== 'undefined'){
+      var labels = meses;
+      var d25 = [];
+      var dw = [];
+      var dtotal = [];
+      for (var i = 0; i < meses.length; i++){
+        d25.push(porMes[meses[i]].cab_25);
+        dw.push(porMes[meses[i]].cab_w);
+        dtotal.push((porMes[meses[i]].venta_25 + porMes[meses[i]].venta_w) / 1e6);
+      }
+      chartProy = new Chart(ctx, {
+        data: {
+          labels: labels,
+          datasets: [
+            {type:'bar', label:'Cab 25 Mayo', data: d25, backgroundColor:'rgba(200,152,88,0.6)', borderRadius:3, yAxisID:'y', stack:'cab'},
+            {type:'bar', label:'Cab Winifreda', data: dw, backgroundColor:'rgba(123,154,175,0.6)', borderRadius:3, yAxisID:'y', stack:'cab'},
+            {type:'line', label:'Venta total (M$)', data: dtotal, borderColor:'#8fa86b', backgroundColor:'#8fa86b', tension:0.2, yAxisID:'y1', pointRadius:3, borderWidth:2}
+          ]
+        },
+        options: {
+          responsive:true, maintainAspectRatio:false,
+          plugins:{legend:{labels:{color:'#b8b2a3'}}},
+          scales:{
+            x:{ticks:{color:'#7a7468'},grid:{color:'#38322b'}},
+            y:{position:'left',stacked:true,ticks:{color:'#7a7468'},grid:{color:'#38322b'},title:{display:true,text:'Cabezas',color:'#7a7468'}},
+            y1:{position:'right',ticks:{color:'#7a7468'},grid:{drawOnChartArea:false},title:{display:true,text:'Millones $',color:'#7a7468'}}
+          }
+        }
+      });
+    }
+  } catch(e){ console.error('chart-proy:', e.message); }
+}
+
+// Boton reset
+safe('btn-reset', function(){
+  var btn = document.getElementById('btn-reset-precios');
+  if (btn) btn.onclick = function(){
+    var keys = Object.keys(PRECIOS_ORIG);
+    for (var i = 0; i < keys.length; i++) PRECIOS[keys[i]] = PRECIOS_ORIG[keys[i]];
+    renderPrecios();
+    renderProyeccion();
+  };
+});
+
+// ============ META Y RESUMEN ============
+safe('meta', function(){
+  setText('meta-fecha', DATOS.supuestos.fecha_reporte);
+  setText('meta-total', fmtInt(DATOS.meta.total_ventas));
+  setText('meta-stock', fmtInt(DATOS.stock_v2.campos['25_de_mayo'].cabezas + DATOS.stock_v2.campos.winifreda.cabezas_pendientes));
+});
+
+safe('resumen', function(){
+  setText('r-stock-25', fmtInt(DATOS.stock_v2.campos['25_de_mayo'].cabezas));
+  setText('r-stock-wini', fmtInt(DATOS.stock_v2.campos.winifreda.cabezas_pendientes));
+  setText('r-vendidos', fmtInt(DATOS.meta.total_ventas));
+  setText('r-gdp', fmt(DATOS.kpi.gdp_global, 2));
+  setText('r-venta', fmtInt(Math.round((DATOS.stock_v2.campos['25_de_mayo'].venta_proyectada + DATOS.stock_v2.campos.winifreda.venta_proyectada)/1e6)));
+  setText('r-eventos', DATOS.stock_v2.campos.winifreda.eventos_pendientes);
+});
+
+safe('precios-proy', function(){
+  renderPrecios();
+  renderProyeccion();
+});
+
+// ============ STOCK ============
+safe('stock', function(){
+  var s25 = DATOS.stock_v2.campos['25_de_mayo'];
+  var sW = DATOS.stock_v2.campos.winifreda;
+  setText('s-25-cab', fmtInt(s25.cabezas));
+  setText('s-25-info', s25.lotes + ' lotes - ' + fmtMon(s25.venta_proyectada) + ' proyectados');
+  setText('s-wini-cab', fmtInt(sW.cabezas_pendientes));
+  setText('s-wini-info', sW.eventos_pendientes + ' eventos pendientes - ' + fmtMon(sW.venta_proyectada) + ' proyectados');
+  setText('w-vacas', fmtInt(sW.stock_actual.vacas));
+  setText('w-toros', fmtInt(sW.stock_actual.toros));
+  setText('w-vq', fmtInt(sW.stock_actual.vaq_preñadas));
+  setText('w-th', fmtInt(sW.stock_actual.terneras));
+  setText('w-tm', fmtInt(sW.stock_actual.terneros));
+  setText('w-total', fmtInt(sW.stock_actual.total));
+
+  var tbl = document.getElementById('tbl-stock-25');
+  var sorted = s25.por_categoria.slice().sort(function(a,b){return b.cabezas - a.cabezas;});
+  for (var i = 0; i < sorted.length; i++){
+    var c = sorted[i];
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td><strong>' + c.Categoria + '</strong></td>' +
+      '<td class="num-cell">' + fmtInt(c.cabezas) + '</td>' +
+      '<td class="num-cell">' + fmtInt(c.lotes) + '</td>' +
+      '<td class="num-cell">' + fmtMon(c.venta) + '</td>';
+    tbl.appendChild(tr);
+  }
+
+  var cont = document.getElementById('lst-eventos-wini');
+  for (var i = 0; i < sW.eventos.length; i++){
+    var e = sW.eventos[i];
+    var fIng = String(e['Fecha ingreso plan.']).substring(0,10);
+    var fSal = String(e.fecha_salida).substring(0,10);
+    var div = document.createElement('div');
+    div.className = 'evento-card';
+    div.innerHTML = '<div class="id-num">' + e.ID + '</div>' +
+      '<div class="nombre">' + e.Evento + '<div class="sub">Cat ' + e['Cat.'] + ' - ' + e['Peso ing. (kg)'] + ' kg ingreso</div></div>' +
+      '<div class="info"><div class="v">' + fmtInt(e['Cab. estim.']) + '</div><div class="l">cabezas</div></div>' +
+      '<div class="info"><div class="v">' + fIng + '</div><div class="l">ingreso plan</div></div>' +
+      '<div class="info"><div class="v">' + fSal + '</div><div class="l">salida estim</div></div>' +
+      '<div class="info"><div class="v">' + fmtMon(e.venta_total) + '</div><div class="l">venta proy</div></div>';
+    cont.appendChild(div);
+  }
+});
+
+// ============ TABLAS HISTORICAS ============
+safe('apertura', function(){
+  var ap = DATOS.apertura_gdp;
+  if (!ap) return;
+  setText('ap-r-gdp', fmt(ap.global.recria_gdp, 2));
+  setText('ap-r-dias', fmtInt(Math.round(ap.global.recria_dias)));
+  setText('ap-t-gdp', fmt(ap.global.term_gdp, 2));
+  setText('ap-t-dias', fmtInt(Math.round(ap.global.term_dias)));
+  
+  var tbl = document.getElementById('tbl-apertura');
+  for (var i = 0; i < ap.por_categoria.length; i++) {
+    var c = ap.por_categoria[i];
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td><strong>' + c.categoria + '</strong></td>' +
+      '<td class="num-cell">' + fmtInt(c.n_total) + '</td>' +
+      '<td class="gdp-cell ' + gdpClass(c.recria_gdp) + '">' + (c.recria_gdp !== null ? fmt(c.recria_gdp, 2) : '-') + '</td>' +
+      '<td class="num-cell">' + (c.recria_dias !== null ? fmtInt(Math.round(c.recria_dias)) : '-') + '</td>' +
+      '<td class="gdp-cell ' + gdpClass(c.term_gdp) + '">' + (c.term_gdp !== null ? fmt(c.term_gdp, 2) : '-') + '</td>' +
+      '<td class="num-cell">' + (c.term_dias !== null ? fmtInt(Math.round(c.term_dias)) : '-') + '</td>';
+    tbl.appendChild(tr);
+  }
+});
+
+safe('chart-apertura', function(){
+  var ap = DATOS.apertura_gdp;
+  if (!ap) return;
+  var labels = ap.por_categoria.map(function(c){ return c.categoria; });
+  var rec = ap.por_categoria.map(function(c){ return c.recria_gdp; });
+  var term = ap.por_categoria.map(function(c){ return c.term_gdp; });
+  var opts = makeBaseOpts();
+  new Chart(document.getElementById('chart-apertura'), {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [
+        {label: 'GDP Recria (<300 kg)', data: rec, backgroundColor: '#d9a657', borderRadius: 4},
+        {label: 'GDP Terminacion (>=300 kg)', data: term, backgroundColor: '#8fa86b', borderRadius: 4}
+      ]
+    },
+    options: opts
+  });
+});
+
+safe('tabla-cat', function(){
+  var cats = DATOS.por_categoria.slice().sort(function(a,b){return b.vendidos - a.vendidos;});
+  var tbl = document.getElementById('tbl-cat');
+  for (var i = 0; i < cats.length; i++){
+    var c = cats[i];
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td><strong>' + c['Categoría'] + '</strong></td>' +
+      '<td class="num-cell">' + fmtInt(c.vendidos) + '</td>' +
+      '<td class="num-cell">' + fmt(c.peso_ing,1) + '</td>' +
+      '<td class="num-cell">' + fmt(c.peso_sal,1) + '</td>' +
+      '<td class="num-cell">' + fmt(c.kg_ganados,1) + '</td>' +
+      '<td class="num-cell">' + fmt(c.dias,0) + '</td>' +
+      '<td class="gdp-cell ' + gdpClass(c.gdp) + '">' + fmt(c.gdp,2) + '</td>';
+    tbl.appendChild(tr);
+  }
+});
+
+safe('tabla-rac', function(){
+  var racs = DATOS.por_racion.slice().sort(function(a,b){return b.vendidos - a.vendidos;});
+  var tbl = document.getElementById('tbl-rac');
+  for (var i = 0; i < racs.length; i++){
+    var c = racs[i];
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td><strong>' + c['Ultima Ración'] + '</strong></td>' +
+      '<td class="num-cell">' + fmtInt(c.vendidos) + '</td>' +
+      '<td class="num-cell">' + fmt(c.peso_ing,1) + '</td>' +
+      '<td class="num-cell">' + fmt(c.peso_sal,1) + '</td>' +
+      '<td class="num-cell">' + fmt(c.kg_ganados,1) + '</td>' +
+      '<td class="num-cell">' + fmt(c.dias,0) + '</td>' +
+      '<td class="gdp-cell ' + gdpClass(c.gdp) + '">' + fmt(c.gdp,2) + '</td>';
+    tbl.appendChild(tr);
+  }
+});
+
+safe('tabla-tropas', function(){
+  var tp = document.getElementById('tbl-peores');
+  for (var i = 0; i < DATOS.tropas_peores.length; i++){
+    var t = DATOS.tropas_peores[i];
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td class="tropa-name">' + t['Nº Tropa'] + '</td>' +
+      '<td class="num-cell">' + fmtInt(t.vendidos) + '</td>' +
+      '<td class="num-cell">' + fmt(t.dias,0) + '</td>' +
+      '<td class="gdp-cell ' + gdpClass(t.gdp) + '">' + fmt(t.gdp,2) + '</td>';
+    tp.appendChild(tr);
+  }
+  var tm = document.getElementById('tbl-mejores');
+  var mejores = DATOS.tropas_mejores.slice().reverse();
+  for (var i = 0; i < mejores.length; i++){
+    var t = mejores[i];
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td class="tropa-name">' + t['Nº Tropa'] + '</td>' +
+      '<td class="num-cell">' + fmtInt(t.vendidos) + '</td>' +
+      '<td class="num-cell">' + fmt(t.dias,0) + '</td>' +
+      '<td class="gdp-cell ' + gdpClass(t.gdp) + '">' + fmt(t.gdp,2) + '</td>';
+    tm.appendChild(tr);
+  }
+});
+
+safe('alarma', function(){
+  var tbl = document.getElementById('tbl-alarma');
+  for (var i = 0; i < DATOS.salidos_en_recria.length; i++){
+    var t = DATOS.salidos_en_recria[i];
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td class="tropa-name">' + t['Nº Tropa'] + '</td>' +
+      '<td class="num-cell">' + fmtInt(t.vendidos) + '</td>' +
+      '<td class="num-cell">' + fmt(t.peso_ing,1) + '</td>' +
+      '<td class="num-cell">' + fmt(t.peso_sal,1) + '</td>' +
+      '<td class="num-cell">' + fmt(t.dias,0) + '</td>' +
+      '<td class="gdp-cell ' + gdpClass(t.gdp) + '">' + fmt(t.gdp,2) + '</td>';
+    tbl.appendChild(tr);
+  }
+});
+
+safe('origen', function(){
+  var tbl = document.getElementById('tbl-origen');
+  for (var i = 0; i < DATOS.comparativa_origen.length; i++){
+    var c = DATOS.comparativa_origen[i];
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td><strong>' + c.categoria + '</strong></td>' +
+      '<td class="num-cell">' + fmtInt(c.n_comp) + '</td>' +
+      '<td class="gdp-cell ' + gdpClass(c.gdp_comp) + '">' + fmt(c.gdp_comp,2) + '</td>' +
+      '<td class="num-cell">' + (c.dias_comp !== null ? fmt(c.dias_comp,0) : '-') + '</td>' +
+      '<td class="num-cell">' + fmtInt(c.n_cria) + '</td>' +
+      '<td class="gdp-cell ' + gdpClass(c.gdp_cria) + '">' + fmt(c.gdp_cria,2) + '</td>' +
+      '<td class="num-cell">' + (c.dias_cria !== null ? fmt(c.dias_cria,0) : '-') + '</td>';
+    tbl.appendChild(tr);
+  }
+});
+
+safe('mensual', function(){
+  var tbl = document.getElementById('tbl-mes');
+  for (var i = 0; i < DATOS.por_mes.length; i++){
+    var m = DATOS.por_mes[i];
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td><strong>' + m.Mes_Venta + '</strong></td>' +
+      '<td class="num-cell">' + fmtInt(m.vendidos) + '</td>' +
+      '<td class="num-cell">' + fmt(m.peso_sal,1) + '</td>' +
+      '<td class="num-cell">' + fmt(m.dias,0) + '</td>' +
+      '<td class="gdp-cell ' + gdpClass(m.gdp) + '">' + fmt(m.gdp,2) + '</td>' +
+      '<td class="num-cell">' + fmtInt(m.kg_ganados) + '</td>';
+    tbl.appendChild(tr);
+  }
+});
+
+safe('conclusiones', function(){
+  var lista = [
+    ['Los numeros son defendibles', 'Validamos con 110.296 pesadas fisicas de TrueTest. 98,5% match exacto.', 'validation'],
+    ['Recategorizacion aplicada (corr 22/05)', '1.796 animales (44,7%) tenian categoria desactualizada en Wincampo. Ahora se usa categoria real segun peso de salida.', 'validation'],
+    ['Stock vivo: peso proyectado de Wincampo no confiable', 'Sobreproyecta 66%. Usar ultima pesada real de TrueTest.', 'alarm'],
+    ['Proyeccion de ventas $12,8 mil millones', '25 de Mayo aporta $5.704M + Winifreda $7.145M en 22 meses.', 'good'],
+    ['GDP historico = 0,83 kg/dia', 'Por debajo del techo teorico (0,91).', ''],
+    ['414 salidos en recria = etiquetas desactualizadas', 'Solo 1 era descarte real. Los otros 413 son terminados normalmente con 400+ kg pero con etiqueta vieja en Wincampo.', 'validation'],
+    ['Cria propia vs comprados: diferencia real en VQ', 'VQ comprados 1,01 vs cria 0,74 (-27%). En NT diferencia 9%. En vacas no hay diferencia.', ''],
+    ['Vacas = 1,08 GDP, 124 dias', 'Las mejores tropas son todas vacas.', 'good'],
+    ['Nave B rinde menos que Nave A', 'Diferencia 10% en terminacion. Confirmar causa.', 'alarm'],
+    ['Categorizacion Wincampo: accion pendiente', 'Recategorizar manualmente los TM/TH con +300 kg.', 'alarm'],
+    ['Codigos de racion confirmados', 'R1=17, R2=18, Adaptacion=20, Terminacion=21.', 'good']
+  ];
+  var cont = document.getElementById('lst-concl');
+  for (var i = 0; i < lista.length; i++){
+    var c = lista[i];
+    var div = document.createElement('div');
+    div.className = 'conclusion ' + (c[2] || '');
+    div.innerHTML = '<div class="title">' + c[0] + '</div><div class="body">' + c[1] + '</div>';
+    cont.appendChild(div);
+  }
+});
+
+// ============ CHARTS ============
+function colorForGdp(g){
+  if (g === null || g === undefined || isNaN(g)) return '#7a7468';
+  if (g < 0.75) return '#c8615a';
+  if (g < 0.95) return '#d9a657';
+  return '#8fa86b';
+}
+
+safe('charts-defaults', function(){
+  if (typeof Chart !== 'undefined'){
+    Chart.defaults.font.family = 'Inter';
+    Chart.defaults.font.size = 11;
+    Chart.defaults.color = '#b8b2a3';
+  }
+});
+
+function makeBaseOpts(){
+  return {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {legend: {labels: {color: '#b8b2a3'}}},
+    scales: {
+      x: {ticks: {color: '#7a7468'}, grid: {color: '#38322b'}},
+      y: {ticks: {color: '#7a7468'}, grid: {color: '#38322b'}}
+    }
+  };
+}
+
+safe('chart-cat-gdp', function(){
+  var sorted = DATOS.por_categoria.slice().sort(function(a,b){return a.gdp - b.gdp;});
+  var opts = makeBaseOpts();
+  opts.plugins.legend = {display: false};
+  new Chart(document.getElementById('chart-cat-gdp'), {
+    type: 'bar',
+    data: {
+      labels: sorted.map(function(c){return c['Categoría'];}),
+      datasets: [{label: 'GDP', data: sorted.map(function(c){return c.gdp;}), backgroundColor: sorted.map(function(c){return colorForGdp(c.gdp);}), borderRadius: 4}]
+    },
+    options: opts
+  });
+});
+
+safe('chart-cat-dias', function(){
+  var sorted = DATOS.por_categoria.slice().sort(function(a,b){return a.gdp - b.gdp;});
+  var opts = makeBaseOpts();
+  opts.plugins.legend = {display: false};
+  new Chart(document.getElementById('chart-cat-dias'), {
+    type: 'bar',
+    data: {
+      labels: sorted.map(function(c){return c['Categoría'];}),
+      datasets: [{label: 'Dias', data: sorted.map(function(c){return c.dias;}), backgroundColor: '#c89858', borderRadius: 4}]
+    },
+    options: opts
+  });
+});
+
+safe('chart-racion', function(){
+  var sorted = DATOS.por_racion.slice().sort(function(a,b){return a.gdp - b.gdp;});
+  var opts = makeBaseOpts();
+  opts.indexAxis = 'y';
+  opts.plugins.legend = {display: false};
+  new Chart(document.getElementById('chart-racion'), {
+    type: 'bar',
+    data: {
+      labels: sorted.map(function(c){return c['Ultima Ración'];}),
+      datasets: [{label: 'GDP', data: sorted.map(function(c){return c.gdp;}), backgroundColor: sorted.map(function(c){return colorForGdp(c.gdp);}), borderRadius: 4}]
+    },
+    options: opts
+  });
+});
+
+safe('chart-nave', function(){
+  var opts = makeBaseOpts();
+  opts.plugins.legend = {display: false};
+  new Chart(document.getElementById('chart-nave'), {
+    type: 'bar',
+    data: {
+      labels: DATOS.por_nave.map(function(n){return n.Nave === '920' ? 'Corral 920' : 'Nave ' + n.Nave;}),
+      datasets: [{label: 'GDP', data: DATOS.por_nave.map(function(n){return n.gdp;}), backgroundColor: DATOS.por_nave.map(function(n){return colorForGdp(n.gdp);}), borderRadius: 4}]
+    },
+    options: opts
+  });
+});
+
+safe('chart-nave-etapa', function(){
+  var datos = DATOS.matriz_nave_racion.filter(function(m){return m.gdp_A !== null && m.gdp_B !== null;});
+  new Chart(document.getElementById('chart-nave-etapa'), {
+    type: 'bar',
+    data: {
+      labels: datos.map(function(m){return m.racion;}),
+      datasets: [
+        {label: 'Nave A', data: datos.map(function(m){return m.gdp_A;}), backgroundColor: '#8fa86b', borderRadius: 4},
+        {label: 'Nave B', data: datos.map(function(m){return m.gdp_B;}), backgroundColor: '#c8615a', borderRadius: 4}
+      ]
+    },
+    options: makeBaseOpts()
+  });
+});
+
+safe('chart-origen', function(){
+  var comp = DATOS.comparativa_origen;
+  new Chart(document.getElementById('chart-origen'), {
+    type: 'bar',
+    data: {
+      labels: comp.map(function(c){return c.categoria;}),
+      datasets: [
+        {label: 'Comprados', data: comp.map(function(c){return c.gdp_comp;}), backgroundColor: '#c89858', borderRadius: 4},
+        {label: 'Cria propia', data: comp.map(function(c){return c.gdp_cria;}), backgroundColor: '#6da14f', borderRadius: 4}
+      ]
+    },
+    options: makeBaseOpts()
+  });
+});
+
+safe('chart-mensual', function(){
+  var opts = makeBaseOpts();
+  opts.scales = {
+    x: opts.scales.x,
+    y: {ticks: {color: '#7a7468'}, grid: {color: '#38322b'}, position: 'left'},
+    y1: {ticks: {color: '#7a7468'}, grid: {drawOnChartArea: false}, position: 'right'}
+  };
+  new Chart(document.getElementById('chart-mensual'), {
+    data: {
+      labels: DATOS.por_mes.map(function(m){return m.Mes_Venta;}),
+      datasets: [
+        {type: 'bar', label: 'Vendidos', data: DATOS.por_mes.map(function(m){return m.vendidos;}), backgroundColor: 'rgba(200,152,88,0.5)', borderRadius: 3, yAxisID: 'y'},
+        {type: 'line', label: 'GDP', data: DATOS.por_mes.map(function(m){return m.gdp;}), borderColor: '#8fa86b', backgroundColor: '#8fa86b', tension: 0.3, yAxisID: 'y1', pointRadius: 4, borderWidth: 2}
+      ]
+    },
+    options: opts
+  });
+});
+
+console.log('Tablero cargado correctamente');
+
+}); // fin DOMContentLoaded
+</script>
+</body>
+</html>
