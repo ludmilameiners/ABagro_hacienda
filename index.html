@@ -170,7 +170,8 @@ footer{margin-top:60px;padding-top:24px;border-top:1px solid var(--border);font-
   <button class="tab-btn" data-tab="categoria">Por categoria</button>
   <button class="tab-btn future" data-tab="apertura">Recria vs Terminacion</button>
   <button class="tab-btn" data-tab="etapa">Por etapa</button>
-  <button class="tab-btn future" data-tab="costo">Costo de engorde</button>
+  <button class="tab-btn" data-tab="costo">Costo de engorde</button>
+  <button class="tab-btn" data-tab="margen">CMg Terneros</button>
   <button class="tab-btn" data-tab="tropas">Tropas</button>
   <button class="tab-btn" data-tab="alarmas">Alarmas</button>
   <button class="tab-btn validation" data-tab="validacion">Validacion</button>
@@ -322,16 +323,39 @@ footer{margin-top:60px;padding-top:24px;border-top:1px solid var(--border);font-
 
 
 <section class="panel" data-panel="costo">
-  <h2 class="section"><span class="num">05b</span>Costo de engorde<span class="badge-validated" style="margin-left:10px;background:#b5852f;">Preliminar</span></h2>
-  <p class="section-desc"><strong>Cifras preliminares (a mejorar).</strong> Costo del alimento por kilo engordado, con los precios de la planilla "Precios Alimento Ganado" (USD/kg c/IVA, TC ~$1.460) y la composición de dieta por etapa. No incluye estructura salvo donde se indica.</p>
-  <div class="callout info"><h4>Hallazgo principal</h4><p>La conversión física es parecida entre etapas (~8 kg MS por kg ganado). El costo del kilo es similar (~2,2–2,9 USD), <strong>no</strong> 6 veces distinto. Y el bajo GDP de recría (0,58) le saca su ventaja natural de costo: a 0,70 recría costaría ~2,2/kg; a 0,58 sube a ~2,6/kg, igual que terminación. El problema productivo de recría es también un problema de costo.</p></div>
-  <div class="tabla"><table><thead><tr><th>Etapa</th><th>GDP usado</th><th>Conv. (kg MS/kg)</th><th>Costo alim. (USD/kg)</th></tr></thead><tbody>
-    <tr><td>Recría 2 (silo, sin maíz)</td><td>0,70 target</td><td>~8</td><td>2,38</td></tr>
-    <tr><td>Recría 2 (silo, sin maíz)</td><td>0,58 medido hist.</td><td>~8</td><td>2,87</td></tr>
-    <tr><td>Recría (bottom-up Consolidado)</td><td>0,70</td><td>—</td><td>2,17 (+0,91 estructura = 3,08 total)</td></tr>
-    <tr><td>Terminación (maíz 57%)</td><td>1,01</td><td>~8</td><td>2,64</td></tr>
+  <h2 class="section"><span class="num">05b</span>Costo de engorde</h2>
+  <p class="section-desc">Costo del alimento por kilo engordado en recría, en <strong>tal cual</strong> (como se maneja la comida), con la conversión de la dieta de Salvador y los precios de "Precios Alimento Ganado". Sin IVA.</p>
+  <div class="callout info"><h4>Costo de recría por kg ganado</h4><p>Engordar un kilo en recría cuesta entre <strong>1,74 USD</strong> (solo costos directos del cultivo) y <strong>2,35 USD</strong> (sumando estructura y financieros del silo de maíz y de la vicia, +46,98% sobre el directo). La estructura + financieros pesa <strong>~0,61 USD por kg de carne</strong>. Conversión usada: <strong>25,3 kg tal cual por kg ganado</strong> (= 10,3 en materia seca), de la dieta de Salvador.</p></div>
+  <div class="tabla"><table><thead><tr><th>Concepto</th><th>Valor</th></tr></thead><tbody>
+    <tr><td>Conversión (dieta Salvador)</td><td>25,3 kg tal cual / kg (10,3 MS)</td></tr>
+    <tr><td>Costo VARIABLE (solo directos)</td><td>1,74 USD / kg ganado</td></tr>
+    <tr><td>Costo COMPLETO (+ estructura + financieros)</td><td>2,35 USD / kg ganado</td></tr>
+    <tr><td>Peso de estructura + financieros</td><td>0,61 USD / kg</td></tr>
   </tbody></table></div>
-  <div class="callout"><h4>Sobre subir el peso de salida de recría a 350 kg</h4><p>Con estos números la ventaja de costo de recría es chica y depende de mejorar su GDP. Antes de decidir falta sumar el costo de los días extra (estructura, sanidad) y es decisión que cruza con criterio veterinario. El tablero aporta el dato objetivo, no la recomendación.</p></div>
+  <div class="callout"><h4>Nota</h4><p>El silo de maíz y la vicia se producen en AB Agro; su costo "completo" incluye personal, mantenimiento, administración y financieros (46,98% sobre el directo). El premix y el maíz grano son comprados (precio limpio). El consumo físico real de Hook da una conversión algo mejor (~18-22 tal cual) pero es preliminar: Hook mide por corral y los animales cambian de corral, así que todavía no se puede atar con certeza cuántos comieron.</p></div>
+</section>
+
+<section class="panel" data-panel="margen">
+  <h2 class="section"><span class="num">06</span>CMg Terneros: comprar a 150, vender a 350</h2>
+  <div class="callout info"><h4>La pregunta</h4><p>¿Conviene comprar terneros livianos (~150 kg) para recriarlos y venderlos a ~350 kg? Acá está el <strong>margen de contribución</strong> por animal, con precios de hacienda de deCampoaCampo (compra ternero banda −160 kg; venta novillito +300 kg) y el costo de comida firme. Precios + IVA (valor neto; el IVA se neutraliza). TC $1.455.</p></div>
+  <div class="kpi-grid">
+    <div class="kpi"><div class="label">Compra ternero 150 kg</div><div class="value">705</div><div class="unit">USD/animal · 6.839 $/kg +IVA</div></div>
+    <div class="kpi"><div class="label">Venta novillito 350 kg</div><div class="value">1.177</div><div class="unit">USD/animal · 4.893 $/kg +IVA</div></div>
+    <div class="kpi"><div class="label">CMg costo variable</div><div class="value" style="color:#8fa86b;">+124</div><div class="unit">USD/animal</div></div>
+    <div class="kpi"><div class="label">CMg costo completo</div><div class="value" style="color:#c9a23f;">+2</div><div class="unit">USD/animal · empata</div></div>
+  </div>
+  <div class="tabla"><table><thead><tr><th>Concepto</th><th>ARS/animal</th><th>USD/animal</th></tr></thead><tbody>
+    <tr><td>Venta (350 kg × 4.893)</td><td>1.712.550</td><td>1.177</td></tr>
+    <tr><td>(−) Compra (150 kg × 6.839)</td><td>−1.025.850</td><td>−705</td></tr>
+    <tr><td><strong>= Bruto (venta − compra)</strong></td><td><strong>686.700</strong></td><td><strong>472</strong></td></tr>
+    <tr><td>(−) Comida, costo variable (200 kg × 1,74)</td><td>−506.340</td><td>−348</td></tr>
+    <tr><td><strong>= CMg con costo variable</strong></td><td><strong>+180.360</strong></td><td><strong>+124</strong></td></tr>
+    <tr><td>(−) Comida, costo completo (200 kg × 2,35)</td><td>−683.850</td><td>−470</td></tr>
+    <tr><td><strong>= CMg con costo completo</strong></td><td><strong>+2.850</strong></td><td><strong>+2</strong></td></tr>
+  </tbody></table></div>
+  <div class="callout info"><h4>Qué incluye cada escenario (y qué no)</h4><p>El silo lo produce la agricultura de AB Agro y se lo "vende" internamente al feedlot. La diferencia entre los dos escenarios es <strong>a qué precio se valúa ese silo</strong>:</p><p><strong>Costo variable:</strong> silo a costo <strong>directo</strong> de agricultura (solo los insumos del cultivo).</p><p><strong>Costo completo:</strong> silo a costo <strong>pleno</strong> de agricultura (directo + estructura + financieros de agricultura) — lo que realmente le cuesta a AB Agro producir ese silo, o sea el precio "justo" de la venta interna.</p><p>Importante: <strong>ningún</strong> escenario incluye la estructura ni los financieros <strong>del feedlot</strong> (personal, mantenimiento, administración del corral). Por eso es un <strong>margen de contribución</strong>, no un resultado final: muestra cuánto deja la operación para cubrir esos costos fijos del feedlot, no la ganancia neta.</p></div>
+  <div class="callout"><h4>Por qué comprar liviano para recriar es el tramo más flojo</h4><p>Se suman dos cosas en contra:</p><p><strong>1. Inversión de precios de la invernada.</strong> El kilo liviano se compra caro (6.839 $/kg) y el kilo pesado se vende barato (4.893 $/kg). Cada kilo que entra a 150 vale menos cuando sale a 350: se pierden ~292.000 ARS solo en los kilos comprados.</p><p><strong>2. La recría liviana engorda lento.</strong> El tramo 150-200 kg gana ~0,34-0,49 kg/día (medido en los animales vendidos), el más lento de todo el ciclo, así que tarda más y come más por kilo producido.</p><p>Resultado: la ganancia de los 200 kg nuevos cubre esa pérdida más la comida pero deja poco. <strong>Cubre el costo variable cómodo</strong> (~124 USD/animal) y con el <strong>costo completo queda en el filo</strong> (~empata, +2 USD): a este animal le alcanza para pagar el alimento pleno pero casi nada le deja para los costos fijos del feedlot. El mejor rendimiento del ciclo está más arriba, de 200 a 350 kg.</p></div>
+  <div class="callout info"><h4>Aclaraciones</h4><p>Preliminar. No incluye sanidad del feedlot (pendiente; es un ítem chico que mueve poco), ni flete ni comisión de venta. Los precios de hacienda son de hoy y van a cambiar durante el año que dura la recría. Conversión tomada de la dieta de Salvador (25,3 tal cual). El margen es sensible al tipo de cambio: con un dólar más alto, la comida (en USD) pesa más y el margen baja.</p></div>
 </section>
 
 <section class="panel" data-panel="etapa">
