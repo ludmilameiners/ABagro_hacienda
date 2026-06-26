@@ -164,6 +164,9 @@ footer{margin-top:60px;padding-top:24px;border-top:1px solid var(--border);font-
 .ir-btn .arr{color:var(--accent);font-weight:700}
 .volver-btn{background:transparent;border:1px solid var(--border);color:var(--ink-2);padding:9px 16px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:500;margin-bottom:20px}
 .volver-btn:hover{background:var(--bg-3);color:var(--accent);border-color:var(--accent)}
+.kpi-ic{position:absolute;top:14px;right:16px;font-size:30px;line-height:1;opacity:0.92}
+.tab-btn .ti-emo{margin-right:6px}
+@media (max-width:768px){.kpi-ic{font-size:24px;top:12px;right:12px}}
 </style>
 </head>
 <body>
@@ -181,23 +184,23 @@ footer{margin-top:60px;padding-top:24px;border-top:1px solid var(--border);font-
 </header>
 
 <nav class="tabs" id="main-tabs">
-  <button class="tab-btn active" data-tab="resumen">Resumen</button>
-  <button class="tab-btn future" data-tab="proyeccion">Proyeccion de ventas</button>
-  <button class="tab-btn" data-tab="stock">Stock</button>
-  <button class="tab-btn" data-tab="costo">Costo de engorde</button>
-  <button class="tab-btn" data-tab="margen">CMg Terneros</button>
+  <button class="tab-btn active" data-tab="resumen">📊 Resumen</button>
+  <button class="tab-btn future" data-tab="proyeccion">📅 Proyeccion de ventas</button>
+  <button class="tab-btn" data-tab="stock">🐄 Stock</button>
+  <button class="tab-btn" data-tab="costo">🌽 Costo de engorde</button>
+  <button class="tab-btn" data-tab="margen">💰 CMg Terneros</button>
 </nav>
 
 <section class="panel active" data-panel="resumen">
   <h2 class="section"><span class="num">01</span>Resumen ejecutivo</h2>
   <p class="section-desc">El feedlot opera en dos sitios: 25 de Mayo (engorde a corral) y Winifreda (campo de cria). Este tablero consolida analisis historico de ventas, stock actual validado y proyeccion a futuro con precios editables.</p>
   <div class="kpi-grid">
-    <div class="kpi campo-25"><div class="label">25 de Mayo - Stock</div><div class="value" id="r-stock-25">-</div><div class="unit">cabezas en engorde</div></div>
-    <div class="kpi campo-wini"><div class="label">Winifreda - Cria</div><div class="value" id="r-stock-wini">-</div><div class="unit">cabezas en campo</div></div>
-    <div class="kpi"><div class="label">Vendidos historico</div><div class="value" id="r-vendidos">-</div><div class="unit">ene 2025 - jun 2026</div></div>
-    <div class="kpi good"><div class="label">GDP de animales vendidos</div><div class="value" id="r-gdp">-</div><div class="unit">kg/dia validado TT</div></div>
-    <div class="kpi"><div class="label">Venta proyectada</div><div class="value" id="r-venta">-</div><div class="unit">millones $</div></div>
-    <div class="kpi"><div class="label">Eventos pendientes Wini</div><div class="value" id="r-eventos">-</div><div class="unit">ingresos planeados</div></div>
+    <div class="kpi campo-25"><div class="kpi-ic">🐄</div><div class="label">25 de Mayo - Stock</div><div class="value" id="r-stock-25">-</div><div class="unit">cabezas en engorde</div></div>
+    <div class="kpi campo-wini"><div class="kpi-ic">🐮</div><div class="label">Winifreda - Cria</div><div class="value" id="r-stock-wini">-</div><div class="unit">cabezas en campo</div></div>
+    <div class="kpi"><div class="kpi-ic">🏷️</div><div class="label">Vendidos historico</div><div class="value" id="r-vendidos">-</div><div class="unit">ene 2025 - jun 2026</div></div>
+    <div class="kpi good"><div class="kpi-ic">📈</div><div class="label">GDP de animales vendidos</div><div class="value" id="r-gdp">-</div><div class="unit">kg/dia validado TT</div></div>
+    <div class="kpi"><div class="kpi-ic">💵</div><div class="label">Venta proyectada</div><div class="value" id="r-venta">-</div><div class="unit">millones $</div></div>
+    <div class="kpi"><div class="kpi-ic">🗓️</div><div class="label">Eventos pendientes Wini</div><div class="value" id="r-eventos">-</div><div class="unit">ingresos planeados</div></div>
   </div>
   <div class="callout"><h4>Lectura rapida</h4><p>Tenes <strong><span id="lr-stock">-</span> cabezas activas en 25 de Mayo</strong> con proyeccion de venta por $<span id="lr-venta25">-</span>M, mas <strong><span id="lr-pend">-</span> cabezas pendientes desde Winifreda</strong> que sumarian otros $<span id="lr-ventaw">-</span>M. Total proyectado al cierre del ciclo: <strong>~$<span id="lr-total">-</span> millones</strong> repartidos a lo largo de unos 2 años, hasta <span id="lr-hasta">-</span>.</p></div>
   <div class="callout validation"><h4>Los numeros son defendibles</h4><p>Validamos los pesos de ingreso contra las pesadas fisicas de TrueTest: 98,5% coincidencia exacta. Para el stock actual usamos la ultima pesada real proyectada a hoy con el GDP medido, no el peso proyectado de Wincampo (que sobreestima 66%).</p></div>
