@@ -378,7 +378,7 @@ footer{margin-top:60px;padding-top:24px;border-top:1px solid var(--border);font-
   <div class="chart-wrap">
     <h3>Ciclo completo por categoría que sale gorda</h3>
     <div class="desc">Cada categoría termina a distinto peso, así que come más días de terminación (se extiende la etapa T3 con su GDP de 1,33 kg/día hasta el peso de venta). Costo de alimento del ciclo completo por animal — reacciona a las perillas.</div>
-    <div class="tabla"><table><thead><tr><th>Categoría</th><th>Ciclo (kg)</th><th>Días</th><th>Costo alimento</th></tr></thead><tbody id="cg-categorias"></tbody></table></div>
+    <div class="tabla"><table><thead><tr><th>Categoría</th><th>Ciclo (kg)</th><th>Días</th><th>Conversión total<br>(kg alim/kg carne)</th><th>Costo alimento</th></tr></thead><tbody id="cg-categorias"></tbody></table></div>
   </div>
 
   <div class="callout info"><h4>Cómo leerlo</h4><p>El escenario por defecto da el <strong>costo de alimento directo</strong>: lo que cuesta la comida valuando los silos a su costo completo de agricultura, sin IVA. Si prendés la estructura y los financieros del feedlot, pasás del "costo de comida" al <strong>costo total del feedlot</strong> (ese 0,66 USD/cab/día es el mismo para todas las etapas, porque es un costo fijo por animal). El IVA es una vista financiera (la planilla contable ya lo incluye); para el análisis económico va apagado.</p></div>
@@ -1208,14 +1208,14 @@ safe('calc-costo-engorde', function(){
     var teb = document.getElementById('cg-etapas');
     if (teb){
       teb.innerHTML = '';
-      var fixedCost = 0, fixedDias = 0, t3Dia = 0;
+      var fixedCost = 0, fixedDias = 0, t3Dia = 0, fixedFeed = 0, t3Kgd = 0;
       ETAPAS.forEach(function(e){
         var kgd = e.grano + e.premix + e.vicia + e.silo;
         var alim = e.grano*P.grano + e.premix*P.premix + e.vicia*P.vicia + e.silo*P.silo;
         var dia = alim + over;
         var tot = dia * e.dias;
         var conv = e.gdp > 0 ? kgd / e.gdp : 0;
-        if (e.pf <= 296){ fixedCost += tot; fixedDias += e.dias; } else { t3Dia = dia; }
+        if (e.pf <= 296){ fixedCost += tot; fixedDias += e.dias; fixedFeed += kgd * e.dias; } else { t3Dia = dia; t3Kgd = kgd; }
         var tr = document.createElement('tr');
         tr.innerHTML = '<td>' + e.n + '</td>' +
           '<td class="num-cell">' + e.pi + '→' + e.pf + '</td>' +
@@ -1235,10 +1235,13 @@ safe('calc-costo-engorde', function(){
           var t3d = Math.round((c.pf - T3_PI) / GDP_T3);
           var costo = fixedCost + t3d * t3Dia;
           var dias = fixedDias + t3d;
+          var feed = fixedFeed + t3Kgd * t3d;
+          var conv = feed / (c.pf - 110);
           var tr = document.createElement('tr');
           tr.innerHTML = '<td>' + c.n + '</td>' +
             '<td class="num-cell">110→' + c.pf + '</td>' +
             '<td class="num-cell">' + dias + '</td>' +
+            '<td class="num-cell">' + fmt(conv,1) + '</td>' +
             '<td class="num-cell" style="font-weight:600">' + fmt(costo,0) + ' USD</td>';
           ceb.appendChild(tr);
         });
