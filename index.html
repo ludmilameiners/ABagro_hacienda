@@ -367,7 +367,13 @@ footer{margin-top:60px;padding-top:24px;border-top:1px solid var(--border);font-
     <div id="cg-break"></div>
   </div>
 
-  <div class="callout info"><h4>Cómo leerlo</h4><p>El escenario por defecto da el <strong>costo de alimento directo</strong>: lo que cuesta la comida valuando los silos a su costo completo de agricultura, sin IVA. Si prendés la estructura y los financieros del feedlot, pasás del "costo de comida" al <strong>costo total del feedlot</strong>. El IVA es una vista financiera (la planilla contable ya lo incluye); para el análisis económico va apagado.</p></div>
+  <div class="chart-wrap">
+    <h3>Costo por etapa de la dieta (por día)</h3>
+    <div class="desc">Composición diaria y costo de cada etapa de la dieta vigente de Salvador (PA 20251020). El alimento cambia por etapa; la estructura/financiero del feedlot es el mismo por cabeza/día para todas. Reacciona a las perillas de arriba.</div>
+    <div class="tabla"><table><thead><tr><th>Etapa</th><th>kg/día</th><th>Alimento USD/día</th><th>+ Feedlot USD/día</th><th>Total USD/día</th></tr></thead><tbody id="cg-etapas"></tbody></table></div>
+  </div>
+
+  <div class="callout info"><h4>Cómo leerlo</h4><p>El escenario por defecto da el <strong>costo de alimento directo</strong>: lo que cuesta la comida valuando los silos a su costo completo de agricultura, sin IVA. Si prendés la estructura y los financieros del feedlot, pasás del "costo de comida" al <strong>costo total del feedlot</strong> (ese 0,66 USD/cab/día es el mismo para todas las etapas, porque es un costo fijo por animal). El IVA es una vista financiera (la planilla contable ya lo incluye); para el análisis económico va apagado.</p></div>
   <div class="callout"><h4>Nota honesta</h4><p>La <strong>vicia</strong> lleva su estructura y financiero <strong>estimados</strong> (mismo +46,98% del maíz), porque todavía falta el bottom-up real de esa campaña. El consumo físico real de Hook daría una conversión algo mejor pero es preliminar: Hook mide por corral y los animales cambian de corral, así que todavía no se puede atar con certeza cuánto comió cada uno.</p></div>
 </section>
 
@@ -1052,6 +1058,13 @@ safe('calc-costo-engorde', function(){
     {id:'grano', nom:'Maíz Grano',            col:'#c8615a', silo:false, d:0.204226, e:0, f:0, iva:0.105,            r1:2.12,   r2:0}
   ];
   var FEED_ESTR = 0.37877, FEED_FIN = 0.28563, KG_PROD = 170;
+  var ETAPAS = [
+    {n:'Recría 1',     grano:2.12,   premix:0.212,  vicia:5.3,    silo:2.968},
+    {n:'Recría 2',     grano:0,      premix:0.5685, vicia:7.58,   silo:10.8015},
+    {n:'Adaptación 1', grano:6.1292, premix:0.4179, vicia:2.0895, silo:5.2934},
+    {n:'Adaptación 2', grano:6.8744, premix:0.3966, vicia:1.983,  silo:3.966},
+    {n:'Terminación',  grano:8.886,  premix:0.4443, vicia:2.2215, silo:3.2582}
+  ];
   var st = {Aestr:true, Afin:true, iva:false, Bestr:false, Bfin:false};
   var togA = [{k:'Aestr',t:'Estructura agric.'},{k:'Afin',t:'Financiero agric.'},{k:'iva',t:'IVA'}];
   var togB = [{k:'Bestr',t:'Estructura feedlot'},{k:'Bfin',t:'Financiero feedlot'}];
@@ -1128,6 +1141,29 @@ safe('calc-costo-engorde', function(){
     var btns = document.querySelectorAll('#tog-A .tog, #tog-B .tog');
     for (var i = 0; i < btns.length; i++){
       btns[i].classList.toggle('on', !!st[btns[i].getAttribute('data-k')]);
+    }
+
+    function precioKg(g){
+      var p = g.d;
+      if (g.silo){ if (st.Aestr) p += g.e; if (st.Afin) p += g.f; }
+      if (st.iva) p *= (1 + g.iva);
+      return p;
+    }
+    var P = {silo:precioKg(ING[0]), vicia:precioKg(ING[1]), premix:precioKg(ING[2]), grano:precioKg(ING[3])};
+    var over = (st.Bestr ? FEED_ESTR : 0) + (st.Bfin ? FEED_FIN : 0);
+    var teb = document.getElementById('cg-etapas');
+    if (teb){
+      teb.innerHTML = '';
+      ETAPAS.forEach(function(e){
+        var kgd = e.grano + e.premix + e.vicia + e.silo;
+        var alim = e.grano*P.grano + e.premix*P.premix + e.vicia*P.vicia + e.silo*P.silo;
+        var tr = document.createElement('tr');
+        tr.innerHTML = '<td>' + e.n + '</td><td class="num-cell">' + fmt(kgd,1) +
+          '</td><td class="num-cell">' + fmt(alim,2) +
+          '</td><td class="num-cell">' + (over>0 ? fmt(over,2) : '—') +
+          '</td><td class="num-cell" style="font-weight:600">' + fmt(alim+over,2) + '</td>';
+        teb.appendChild(tr);
+      });
     }
     renderMargen();
   }
