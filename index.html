@@ -372,7 +372,7 @@ footer{margin-top:60px;padding-top:24px;border-top:1px solid var(--border);font-
   <div class="chart-wrap">
     <h3>Costo por etapa de la dieta (por día)</h3>
     <div class="desc">Ciclo completo 110→450 kg (estructura PA 20251020, recría sin maíz). Días y pesos reales por etapa. El "USD/día" y el "Costo etapa" reaccionan a las perillas de arriba (alimento + estructura/financiero del feedlot si los prendés).</div>
-    <div class="tabla"><table><thead><tr><th>Etapa</th><th>Entra→Sale (kg)</th><th>Días</th><th>kg/día</th><th>USD/día</th><th>Costo etapa USD</th></tr></thead><tbody id="cg-etapas"></tbody></table></div>
+    <div class="tabla"><table><thead><tr><th>Etapa</th><th>Entra→Sale (kg)</th><th>Días</th><th>kg/día</th><th>Conversión<br>(kg alim/kg carne)</th><th>USD/día</th><th>Costo etapa USD</th></tr></thead><tbody id="cg-etapas"></tbody></table></div>
   </div>
 
   <div class="chart-wrap">
@@ -1113,11 +1113,11 @@ safe('calc-costo-engorde', function(){
   ];
   var FEED_ESTR = 0.37877, FEED_FIN = 0.28563, KG_PROD = 170;
   var ETAPAS = [
-    {n:'Recría 1',      pi:110, pf:150, dias:67,  grano:0,      premix:0.212,  vicia:5.3,    silo:2.968},
-    {n:'Recría 2',      pi:150, pf:280, dias:176, grano:0,      premix:0.5685, vicia:7.58,   silo:10.8015},
-    {n:'Terminación 1', pi:280, pf:288, dias:7,   grano:6.1292, premix:0.4179, vicia:2.0895, silo:5.2934},
-    {n:'Terminación 2', pi:288, pf:296, dias:7,   grano:6.8744, premix:0.3966, vicia:1.983,  silo:3.966},
-    {n:'Terminación 3', pi:296, pf:450, dias:116, grano:8.886,  premix:0.4443, vicia:2.2215, silo:3.2582}
+    {n:'Recría 1',      pi:110, pf:150, dias:67,  gdp:0.597, grano:0,      premix:0.212,  vicia:5.3,    silo:2.968},
+    {n:'Recría 2',      pi:150, pf:280, dias:176, gdp:0.740, grano:0,      premix:0.5685, vicia:7.58,   silo:10.8015},
+    {n:'Terminación 1', pi:280, pf:288, dias:7,   gdp:1.089, grano:6.1292, premix:0.4179, vicia:2.0895, silo:5.2934},
+    {n:'Terminación 2', pi:288, pf:296, dias:7,   gdp:1.120, grano:6.8744, premix:0.3966, vicia:1.983,  silo:3.966},
+    {n:'Terminación 3', pi:296, pf:450, dias:116, gdp:1.331, grano:8.886,  premix:0.4443, vicia:2.2215, silo:3.2582}
   ];
   var st = {Aestr:true, Afin:true, iva:false, Bestr:false, Bfin:false};
   var togA = [{k:'Aestr',t:'Estructura agric.'},{k:'Afin',t:'Financiero agric.'},{k:'iva',t:'IVA'}];
@@ -1214,12 +1214,14 @@ safe('calc-costo-engorde', function(){
         var alim = e.grano*P.grano + e.premix*P.premix + e.vicia*P.vicia + e.silo*P.silo;
         var dia = alim + over;
         var tot = dia * e.dias;
+        var conv = e.gdp > 0 ? kgd / e.gdp : 0;
         if (e.pf <= 296){ fixedCost += tot; fixedDias += e.dias; } else { t3Dia = dia; }
         var tr = document.createElement('tr');
         tr.innerHTML = '<td>' + e.n + '</td>' +
           '<td class="num-cell">' + e.pi + '→' + e.pf + '</td>' +
           '<td class="num-cell">' + e.dias + '</td>' +
           '<td class="num-cell">' + fmt(kgd,1) + '</td>' +
+          '<td class="num-cell">' + fmt(conv,1) + '</td>' +
           '<td class="num-cell">' + fmt(dia,2) + '</td>' +
           '<td class="num-cell" style="font-weight:600">' + fmt(tot,0) + '</td>';
         teb.appendChild(tr);
