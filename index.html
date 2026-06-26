@@ -373,6 +373,12 @@ footer{margin-top:60px;padding-top:24px;border-top:1px solid var(--border);font-
     <div class="tabla"><table><thead><tr><th>Etapa</th><th>Entra→Sale (kg)</th><th>Días</th><th>kg/día</th><th>USD/día</th><th>Costo etapa USD</th></tr></thead><tbody id="cg-etapas"></tbody></table></div>
   </div>
 
+  <div class="chart-wrap">
+    <h3>Ciclo completo por categoría que sale gorda</h3>
+    <div class="desc">Cada categoría termina a distinto peso, así que come más días de terminación (se extiende la etapa T3 con su GDP de 1,33 kg/día hasta el peso de venta). Costo de alimento del ciclo completo por animal — reacciona a las perillas.</div>
+    <div class="tabla"><table><thead><tr><th>Categoría</th><th>Ciclo (kg)</th><th>Días</th><th>Costo alimento</th></tr></thead><tbody id="cg-categorias"></tbody></table></div>
+  </div>
+
   <div class="callout info"><h4>Cómo leerlo</h4><p>El escenario por defecto da el <strong>costo de alimento directo</strong>: lo que cuesta la comida valuando los silos a su costo completo de agricultura, sin IVA. Si prendés la estructura y los financieros del feedlot, pasás del "costo de comida" al <strong>costo total del feedlot</strong> (ese 0,66 USD/cab/día es el mismo para todas las etapas, porque es un costo fijo por animal). El IVA es una vista financiera (la planilla contable ya lo incluye); para el análisis económico va apagado.</p></div>
   <div class="callout"><h4>Nota honesta</h4><p>La <strong>vicia</strong> lleva su estructura y financiero <strong>estimados</strong> (mismo +46,98% del maíz), porque todavía falta el bottom-up real de esa campaña. El consumo físico real de Hook daría una conversión algo mejor pero es preliminar: Hook mide por corral y los animales cambian de corral, así que todavía no se puede atar con certeza cuánto comió cada uno.</p></div>
 </section>
@@ -1154,13 +1160,13 @@ safe('calc-costo-engorde', function(){
     var teb = document.getElementById('cg-etapas');
     if (teb){
       teb.innerHTML = '';
-      var totCiclo = 0, diasCiclo = 0;
+      var fixedCost = 0, fixedDias = 0, t3Dia = 0;
       ETAPAS.forEach(function(e){
         var kgd = e.grano + e.premix + e.vicia + e.silo;
         var alim = e.grano*P.grano + e.premix*P.premix + e.vicia*P.vicia + e.silo*P.silo;
         var dia = alim + over;
         var tot = dia * e.dias;
-        totCiclo += tot; diasCiclo += e.dias;
+        if (e.pf <= 296){ fixedCost += tot; fixedDias += e.dias; } else { t3Dia = dia; }
         var tr = document.createElement('tr');
         tr.innerHTML = '<td>' + e.n + '</td>' +
           '<td class="num-cell">' + e.pi + '→' + e.pf + '</td>' +
@@ -1170,11 +1176,23 @@ safe('calc-costo-engorde', function(){
           '<td class="num-cell" style="font-weight:600">' + fmt(tot,0) + '</td>';
         teb.appendChild(tr);
       });
-      var trt = document.createElement('tr');
-      trt.innerHTML = '<td style="font-weight:600">Ciclo 110→450</td>' +
-        '<td class="num-cell">110→450</td><td class="num-cell" style="font-weight:600">' + diasCiclo + '</td>' +
-        '<td></td><td></td><td class="num-cell" style="font-weight:600">' + fmt(totCiclo,0) + '</td>';
-      teb.appendChild(trt);
+      var GDP_T3 = 1.331, T3_PI = 296;
+      var GORDAS = [{n:'Vaquillona / Ternera', pf:450},{n:'Novillo', pf:500},{n:'Vaca', pf:550}];
+      var ceb = document.getElementById('cg-categorias');
+      if (ceb){
+        ceb.innerHTML = '';
+        GORDAS.forEach(function(c){
+          var t3d = Math.round((c.pf - T3_PI) / GDP_T3);
+          var costo = fixedCost + t3d * t3Dia;
+          var dias = fixedDias + t3d;
+          var tr = document.createElement('tr');
+          tr.innerHTML = '<td>' + c.n + '</td>' +
+            '<td class="num-cell">110→' + c.pf + '</td>' +
+            '<td class="num-cell">' + dias + '</td>' +
+            '<td class="num-cell" style="font-weight:600">' + fmt(costo,0) + ' USD</td>';
+          ceb.appendChild(tr);
+        });
+      }
     }
     renderMargen();
   }
