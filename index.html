@@ -369,8 +369,8 @@ footer{margin-top:60px;padding-top:24px;border-top:1px solid var(--border);font-
 
   <div class="chart-wrap">
     <h3>Costo por etapa de la dieta (por día)</h3>
-    <div class="desc">Composición diaria y costo de cada etapa de la dieta vigente de Salvador (PA 20251020). El alimento cambia por etapa; la estructura/financiero del feedlot es el mismo por cabeza/día para todas. Reacciona a las perillas de arriba.</div>
-    <div class="tabla"><table><thead><tr><th>Etapa</th><th>kg/día</th><th>Alimento USD/día</th><th>+ Feedlot USD/día</th><th>Total USD/día</th></tr></thead><tbody id="cg-etapas"></tbody></table></div>
+    <div class="desc">Ciclo completo 110→450 kg (estructura PA 20251020, recría sin maíz). Días y pesos reales por etapa. El "USD/día" y el "Costo etapa" reaccionan a las perillas de arriba (alimento + estructura/financiero del feedlot si los prendés).</div>
+    <div class="tabla"><table><thead><tr><th>Etapa</th><th>Entra→Sale (kg)</th><th>Días</th><th>kg/día</th><th>USD/día</th><th>Costo etapa USD</th></tr></thead><tbody id="cg-etapas"></tbody></table></div>
   </div>
 
   <div class="callout info"><h4>Cómo leerlo</h4><p>El escenario por defecto da el <strong>costo de alimento directo</strong>: lo que cuesta la comida valuando los silos a su costo completo de agricultura, sin IVA. Si prendés la estructura y los financieros del feedlot, pasás del "costo de comida" al <strong>costo total del feedlot</strong> (ese 0,66 USD/cab/día es el mismo para todas las etapas, porque es un costo fijo por animal). El IVA es una vista financiera (la planilla contable ya lo incluye); para el análisis económico va apagado.</p></div>
@@ -1059,11 +1059,11 @@ safe('calc-costo-engorde', function(){
   ];
   var FEED_ESTR = 0.37877, FEED_FIN = 0.28563, KG_PROD = 170;
   var ETAPAS = [
-    {n:'Recría 1',     grano:0,      premix:0.212,  vicia:5.3,    silo:2.968},
-    {n:'Recría 2',     grano:0,      premix:0.5685, vicia:7.58,   silo:10.8015},
-    {n:'Adaptación 1', grano:6.1292, premix:0.4179, vicia:2.0895, silo:5.2934},
-    {n:'Adaptación 2', grano:6.8744, premix:0.3966, vicia:1.983,  silo:3.966},
-    {n:'Terminación',  grano:8.886,  premix:0.4443, vicia:2.2215, silo:3.2582}
+    {n:'Recría 1',      pi:110, pf:150, dias:67,  grano:0,      premix:0.212,  vicia:5.3,    silo:2.968},
+    {n:'Recría 2',      pi:150, pf:280, dias:176, grano:0,      premix:0.5685, vicia:7.58,   silo:10.8015},
+    {n:'Terminación 1', pi:280, pf:288, dias:7,   grano:6.1292, premix:0.4179, vicia:2.0895, silo:5.2934},
+    {n:'Terminación 2', pi:288, pf:296, dias:7,   grano:6.8744, premix:0.3966, vicia:1.983,  silo:3.966},
+    {n:'Terminación 3', pi:296, pf:450, dias:116, grano:8.886,  premix:0.4443, vicia:2.2215, silo:3.2582}
   ];
   var st = {Aestr:true, Afin:true, iva:false, Bestr:false, Bfin:false};
   var togA = [{k:'Aestr',t:'Estructura agric.'},{k:'Afin',t:'Financiero agric.'},{k:'iva',t:'IVA'}];
@@ -1154,16 +1154,27 @@ safe('calc-costo-engorde', function(){
     var teb = document.getElementById('cg-etapas');
     if (teb){
       teb.innerHTML = '';
+      var totCiclo = 0, diasCiclo = 0;
       ETAPAS.forEach(function(e){
         var kgd = e.grano + e.premix + e.vicia + e.silo;
         var alim = e.grano*P.grano + e.premix*P.premix + e.vicia*P.vicia + e.silo*P.silo;
+        var dia = alim + over;
+        var tot = dia * e.dias;
+        totCiclo += tot; diasCiclo += e.dias;
         var tr = document.createElement('tr');
-        tr.innerHTML = '<td>' + e.n + '</td><td class="num-cell">' + fmt(kgd,1) +
-          '</td><td class="num-cell">' + fmt(alim,2) +
-          '</td><td class="num-cell">' + (over>0 ? fmt(over,2) : '—') +
-          '</td><td class="num-cell" style="font-weight:600">' + fmt(alim+over,2) + '</td>';
+        tr.innerHTML = '<td>' + e.n + '</td>' +
+          '<td class="num-cell">' + e.pi + '→' + e.pf + '</td>' +
+          '<td class="num-cell">' + e.dias + '</td>' +
+          '<td class="num-cell">' + fmt(kgd,1) + '</td>' +
+          '<td class="num-cell">' + fmt(dia,2) + '</td>' +
+          '<td class="num-cell" style="font-weight:600">' + fmt(tot,0) + '</td>';
         teb.appendChild(tr);
       });
+      var trt = document.createElement('tr');
+      trt.innerHTML = '<td style="font-weight:600">Ciclo 110→450</td>' +
+        '<td class="num-cell">110→450</td><td class="num-cell" style="font-weight:600">' + diasCiclo + '</td>' +
+        '<td></td><td></td><td class="num-cell" style="font-weight:600">' + fmt(totCiclo,0) + '</td>';
+      teb.appendChild(trt);
     }
     renderMargen();
   }
