@@ -196,14 +196,15 @@ footer{margin-top:60px;padding-top:24px;border-top:1px solid var(--border);font-
   <div class="kpi-grid">
     <div class="kpi campo-25"><div class="label">25 de Mayo - Stock</div><div class="value" id="r-stock-25">-</div><div class="unit">cabezas en engorde</div></div>
     <div class="kpi campo-wini"><div class="label">Winifreda - Cria</div><div class="value" id="r-stock-wini">-</div><div class="unit">cabezas en campo</div></div>
-    <div class="kpi"><div class="label">Vendidos historico</div><div class="value" id="r-vendidos">-</div><div class="unit">ene 2025 - may 2026</div></div>
+    <div class="kpi"><div class="label">Vendidos historico</div><div class="value" id="r-vendidos">-</div><div class="unit">ene 2025 - jun 2026</div></div>
     <div class="kpi good"><div class="label">GDP de animales vendidos</div><div class="value" id="r-gdp">-</div><div class="unit">kg/dia validado TT</div></div>
     <div class="kpi"><div class="label">Venta proyectada</div><div class="value" id="r-venta">-</div><div class="unit">millones $</div></div>
     <div class="kpi"><div class="label">Eventos pendientes Wini</div><div class="value" id="r-eventos">-</div><div class="unit">ingresos planeados</div></div>
   </div>
-  <div class="callout"><h4>Lectura rapida</h4><p>Tenes <strong>2.644 cabezas activas en 25 de Mayo</strong> con proyeccion de venta por $5.711M, mas <strong>1.731 cabezas pendientes desde Winifreda</strong> que sumarian otros $7.145M. Total proyectado al cierre del ciclo: <strong>~$12.857 millones</strong> repartidos a lo largo de unos 2 años, hasta mayo 2028.</p></div>
-  <div class="callout validation"><h4>Los numeros son defendibles</h4><p>Validamos los pesos de ingreso contra 110.296 pesadas fisicas de TrueTest: 98,5% coincidencia exacta. Para el stock actual usamos la ultima pesada real, no el peso proyectado de Wincampo (que sobreestima 66%).</p></div>
-  <div class="callout info"><h4>Etapas reales de dieta</h4><p>Cinco etapas: <strong>Recría 1, Recría 2, Adaptación 1, Adaptación 2, Terminación</strong>. Los números de "Ración" en Wincampo son códigos internos que cambian en el tiempo (no son una leyenda fija), así que la composición real se cruza con la planilla de dietas.</p></div>
+  <div class="callout"><h4>Lectura rapida</h4><p>Tenes <strong><span id="lr-stock">-</span> cabezas activas en 25 de Mayo</strong> con proyeccion de venta por $<span id="lr-venta25">-</span>M, mas <strong><span id="lr-pend">-</span> cabezas pendientes desde Winifreda</strong> que sumarian otros $<span id="lr-ventaw">-</span>M. Total proyectado al cierre del ciclo: <strong>~$<span id="lr-total">-</span> millones</strong> repartidos a lo largo de unos 2 años, hasta <span id="lr-hasta">-</span>.</p></div>
+  <div class="callout validation"><h4>Los numeros son defendibles</h4><p>Validamos los pesos de ingreso contra las pesadas fisicas de TrueTest: 98,5% coincidencia exacta. Para el stock actual usamos la ultima pesada real proyectada a hoy con el GDP medido, no el peso proyectado de Wincampo (que sobreestima 66%).</p></div>
+  <div class="callout info"><h4>Costo de engorde por etapa y categoria</h4><p>Engordar un animal desde 110 kg cuesta (solo alimento, recria sin maiz): <strong>~651 USD</strong> una vaquillona (a 450 kg), <strong>~741 USD</strong> un novillo (a 500 kg) y <strong>~834 USD</strong> una vaca (a 550 kg) — la vaca come ~75 dias mas. El detalle por etapa (entra/sale, dias, que come por dia y costo) y el escenario editable (con o sin estructura/financiero del feedlot) estan en la pestaña <strong>Costo de engorde</strong>.</p></div>
+  <div class="callout info"><h4>Etapas reales de dieta</h4><p>Cinco etapas: <strong>Recría 1, Recría 2, Terminación 1, Terminación 2, Terminación 3</strong> (estructura PA 20251020). La <strong>recría va sin maíz</strong> (criterio de Salvador). Los números de "Ración" en Wincampo son códigos internos que cambian en el tiempo, así que la composición real se cruza con la planilla de dietas.</p></div>
 </section>
 
 <section class="panel" data-panel="proyeccion">
@@ -680,6 +681,16 @@ safe('resumen', function(){
   setText('r-gdp', fmt(DATOS.kpi.gdp_global, 2));
   setText('r-venta', fmtInt(Math.round((DATOS.stock_v2.campos['25_de_mayo'].venta_proyectada + DATOS.stock_v2.campos.winifreda.venta_proyectada)/1e6)));
   setText('r-eventos', DATOS.stock_v2.campos.winifreda.eventos_pendientes);
+  var fl25 = DATOS.stock_v2.campos['25_de_mayo'], flw = DATOS.stock_v2.campos.winifreda;
+  setText('lr-stock', fmtInt(fl25.cabezas));
+  setText('lr-venta25', fmtInt(Math.round(fl25.venta_proyectada/1e6)));
+  setText('lr-pend', fmtInt(flw.cabezas_pendientes));
+  setText('lr-ventaw', fmtInt(Math.round(flw.venta_proyectada/1e6)));
+  setText('lr-total', fmtInt(Math.round((fl25.venta_proyectada + flw.venta_proyectada)/1e6)));
+  var meses = (DATOS.lotes_proy||[]).map(function(l){return l.mes_salida;}).filter(Boolean).sort();
+  var MM = {'01':'enero','02':'febrero','03':'marzo','04':'abril','05':'mayo','06':'junio','07':'julio','08':'agosto','09':'septiembre','10':'octubre','11':'noviembre','12':'diciembre'};
+  var ult = meses.length ? meses[meses.length-1] : '';
+  setText('lr-hasta', ult ? (MM[ult.slice(5,7)] + ' ' + ult.slice(0,4)) : '-');
 });
 
 safe('precios-proy', function(){
