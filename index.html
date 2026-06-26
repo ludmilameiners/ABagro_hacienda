@@ -1055,11 +1055,11 @@ safe('calc-costo-engorde', function(){
     {id:'silo',  nom:'Silo de Maíz',          col:'#c89858', silo:true,  d:0.051386, e:0.013419, f:0.010722, iva:0.1073, r1:2.968,  r2:10.8015},
     {id:'vicia', nom:'Vicia + Triticale',     col:'#8fa86b', silo:true,  d:0.050800, e:0.013266, f:0.010600, iva:0.1073, r1:5.3,    r2:7.58},
     {id:'premix',nom:'Premix Antar',          col:'#7b9aaf', silo:false, d:0.480874, e:0, f:0, iva:0.21,             r1:0.212,  r2:0.5685},
-    {id:'grano', nom:'Maíz Grano',            col:'#c8615a', silo:false, d:0.204226, e:0, f:0, iva:0.105,            r1:2.12,   r2:0}
+    {id:'grano', nom:'Maíz Grano',            col:'#c8615a', silo:false, d:0.204226, e:0, f:0, iva:0.105,            r1:0,      r2:0}
   ];
   var FEED_ESTR = 0.37877, FEED_FIN = 0.28563, KG_PROD = 170;
   var ETAPAS = [
-    {n:'Recría 1',     grano:2.12,   premix:0.212,  vicia:5.3,    silo:2.968},
+    {n:'Recría 1',     grano:0,      premix:0.212,  vicia:5.3,    silo:2.968},
     {n:'Recría 2',     grano:0,      premix:0.5685, vicia:7.58,   silo:10.8015},
     {n:'Adaptación 1', grano:6.1292, premix:0.4179, vicia:2.0895, silo:5.2934},
     {n:'Adaptación 2', grano:6.8744, premix:0.3966, vicia:1.983,  silo:3.966},
